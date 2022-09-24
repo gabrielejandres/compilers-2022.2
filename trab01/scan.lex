@@ -20,13 +20,13 @@ CARACTERE   {LETRA}|(\_)
 ALFA_NUM    {CARACTERE}|{DIGITO}
 CMT_LINHA   \/\/[^\n]*
 CMT_BLOCO   \/\*([^*]|([*]+([^/])))*\*\/
-ESCAPE      [\\][^\n]
-TEXTO       [^`${]*
+ESCAPE      [\\][^\n] 
+TXT         \`([^`$]|[$]+[^`{])*\`    
 TXT_EXP     \`[^`]*\$   
 EXP_TXT     \}[^\`]*\`
 ASPAS_SMP   \'([^']|{ESCAPE}|(\'\'))*\'
 ASPAS_DP    \"([^"]|{ESCAPE}|(\"\"))*\"
-ASPAS_INV   \`{TEXTO}\`|\`{TEXTO}[$]+[^`{]*\`|\`{TEXTO}[{]+[^`]*\`|{TXT_EXP}|{EXP_TXT}
+ASPAS_INV   {TXT}|{TXT_EXP}|{EXP_TXT}
 
 /* 2. Definicoes para os tokens dados */
 INT         {DIGITO}+
