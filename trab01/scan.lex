@@ -14,32 +14,32 @@ string lexema;
 /* Definicoes regulares */
 
 /* 1. Definicoes auxiliares */
-DIGITO      [0-9]
-LETRA	    [A-Za-z]
-CARACTERE   {LETRA}|(\_)
-ALFA_NUM    {CARACTERE}|{DIGITO}
-CMT_LINHA   \/\/[^\n]*
-CMT_BLOCO   \/\*([^*]|([*]+([^/])))*\*\/
-ESCAPE      [\\][^\n] 
-TXT         \`([^`$]|[$]+[^`{])*\`    
-TXT_EXP     \`[^`]*\$   
-EXP_TXT     \}[^\`]*\`
-ASPAS_SMP   \'([^']|{ESCAPE}|(\'\'))*\'
-ASPAS_DP    \"([^"]|{ESCAPE}|(\"\"))*\"
-ASPAS_INV   {TXT}|{TXT_EXP}|{EXP_TXT}
+DIGITO          [0-9]
+LETRA	        [A-Za-z]
+CARACTERE       {LETRA}|(\_)
+ALFA_NUM        {CARACTERE}|{DIGITO}
+CMT_LINHA       \/\/[^\n]*
+CMT_BLOCO       \/\*([^*]|([*]+([^/])))*\*\/
+ESCAPE          [\\][^\n] 
+TXT             \`([^`$]|[$]+[^`{])*\`    
+TXT_EXP         \`[^`]*\$   
+EXP_TXT         \}[^\`]*\`
+ASPAS_SMP       \'([^']|{ESCAPE}|(\'\'))*\'
+ASPAS_DP        \"([^"]|{ESCAPE}|(\"\"))*\"
+ASPAS_INV       {TXT}|{TXT_EXP}|{EXP_TXT}
 
 /* 2. Definicoes para os tokens dados */
-INT         {DIGITO}+
-FLOAT	    {INT}(\.{INT})?([Ee](\+|\-)?{INT})?
-FOR         [Ff][Oo][Rr]
-IF          [Ii][Ff]
-CMT         {CMT_LINHA}|{CMT_BLOCO}
-STRING      {ASPAS_SMP}|{ASPAS_DP}
-STRING2     {ASPAS_INV}
-ID	        (\$|{CARACTERE})((\@)*{ALFA_NUM}+(\@)*)*
-EXPR        \{{ID}*
-ID_INVALIDO {ALFA_NUM}*(\$)*(\@)*{ALFA_NUM}*(\$)*(\@)*
-WS	        [ \t\n]
+INT             {DIGITO}+
+FLOAT	        {INT}(\.{INT})?([Ee](\+|\-)?{INT})?
+FOR             [Ff][Oo][Rr]
+IF              [Ii][Ff]
+CMT             {CMT_LINHA}|{CMT_BLOCO}
+STRING          {ASPAS_SMP}|{ASPAS_DP}
+STRING2         {ASPAS_INV}
+ID	            (\$|{CARACTERE})((\@)*{ALFA_NUM}+(\@)*)*
+EXPR            \{{ID}*
+ID_INVALIDO     {ALFA_NUM}*(\$)*(\@)*{ALFA_NUM}*(\$)*(\@)*
+WS	            [ \t\n]
 
 %%
 
