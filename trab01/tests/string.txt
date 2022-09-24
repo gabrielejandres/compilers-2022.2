@@ -1,0 +1,9 @@
+a = "Um ""texto \o/ //\\/* */" ;
+`  string ' "/*" '
+*/ //
+`;
+$ = "Uma String" "outra\t string" "d'ouro";
+a $_ $ = "Um texto";
+`Hora atual: $ !`
+`Hora atual: ${agora} horas!`
+a = "Um \"texto" 'd\'água' 'd''ouro " ""';
