@@ -3,10 +3,9 @@
 
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 using namespace std;
-
-enum TOKEN { _ID = 256, _FOR, _IF, _INT, _FLOAT, _MAIG, _MEIG, _IG, _DIF, _STRING, _STRING2, _COMENTARIO, EXPR };
 
 string lexema;
 
@@ -19,37 +18,41 @@ DIGITO      [0-9]
 LETRA	    [A-Za-z_]
 CMT_LINHA   \/\/[^\n]*
 CMT_BLOCO   \/\*([^*]|([*]+([^/])))*\*\/
-ASPAS_SMP   \'(([^\n\']|[\\\']|(\'\'))*)\'
-ASPAS_DP    \"(([^\n\"]|[\\\"]|(\"\"))*)\"
+ASPAS_SMP   \'([^'\\]|[\\][^\n]|('')*)*\'
+ASPAS_DP    \"([^"\\]|[\\][^\n]|("")*)*\"
+ASPAS_INV   \`[^`${]*\`|\`[^`${]*[$]+[^`{]*\`|\`[^`${]*[{]+[^`]*\`|\`[^`]*\$|\}[^\`]*\`
 
 /* 2. Definicoes para os tokens dados */
-ID	        (\$|{LETRA})((\@)*({LETRA}|{DIGITO})+)*
 INT         {DIGITO}+
 FLOAT	    {INT}(\.{INT})?([Ee](\+|\-)?{INT})?
 FOR         [Ff][Oo][Rr]
 IF          [Ii][Ff]
 CMT         {CMT_LINHA}|{CMT_BLOCO}
 STRING      {ASPAS_SMP}|{ASPAS_DP}
-STRING2
+STRING2     {ASPAS_INV}
+ID	        (\$|{LETRA})((\@|{LETRA}|{DIGITO})*({LETRA}|{DIGITO})+(\@|{LETRA}|{DIGITO})*)*
+EXPR        \{{ID}*
+INVALID_ID  ({LETRA}|{DIGITO})*(\$)*(\@)*({LETRA}|{DIGITO})*(\$)*(\@)*
 WS	        [ \t\n]
 
 %%
 
-{WS}	{ /* ignora espaços, tabs e '\n' */ } 
+{WS}	        { /* ignora espaços, tabs e '\n' */ } 
+{INT}           { lexema = yytext; return _INT; }
+{FLOAT}         { lexema = yytext; return _FLOAT; }
+{FOR}           { lexema = yytext; return _FOR; }
+{IF}            { lexema = yytext; return _IF; }
+{CMT}           { lexema = yytext; return _COMENTARIO; }
+{STRING}        { lexema = yytext; lexema.pop_back(); lexema.erase(lexema.begin()); return _STRING; }
+{STRING2}       { lexema = yytext; lexema.pop_back(); lexema.erase(lexema.begin()); return _STRING2; }
+{ID}            { lexema = yytext; return _ID; }
+{INVALID_ID}    { cout << "Erro: Identificador inválido: " << yytext << endl; }
+{EXPR}          { lexema = yytext; lexema.erase(lexema.begin()); return _EXPR; }
+">="	        { lexema = yytext; return _MAIG; }
+"<="	        { lexema = yytext; return _MEIG; }
+"=="	        { lexema = yytext; return _IG; }
+"!="	        { lexema = yytext; return _DIF; }
 
-ID      { lexema = yytext; return _ID; }
-INT     { lexema = yytext; return _INT; }
-FLOAT   { lexema = yytext; return _FLOAT; }
-FOR     { lexema = yytext; return _FOR; }
-IF      { lexema = yytext; return _IF; }
-CMT     { lexema = yytext; return _COMENTARIO; }
-STRING  { lexema = yytext; return _STRING; }
-
-">="	{ return _MAIG; }
-"<="	{ return _MEIG; }
-"=="	{ return _IG; }
-"!="	{ return _DIF; }
-
-.       { return *yytext;   /* qualquer caractere isolado será retornado pelo seu código ascii. */ }
+.               { lexema = yytext; return *yytext;   /* qualquer caractere isolado será retornado pelo seu código ascii. */ }
 
 %%
