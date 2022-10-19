@@ -1,0 +1,10 @@
+A -> id { Print( lexema ); } = E { Print( "="); }
+E -> E + T { Print( "+"); }
+   | E - T { Print( "-"); }
+   | T
+T -> T * F { Print( "*"); }
+   | T / F { Print( "/"); }
+   | F
+F -> id { Print(lexema + "@"); }
+   | num { Print( lexema ); }
+   | ( E )
