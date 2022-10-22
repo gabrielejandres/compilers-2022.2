@@ -470,8 +470,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "main.lex"
-#line 2 "main.lex"
+#line 1 "tradutor.lex"
+#line 2 "tradutor.lex"
 /* Declaracoes em C/C++ */
 #include <iostream>
 #include <map>
@@ -496,6 +496,7 @@ void P();           // print
 void casa(int);
 void print(string);
 void atualiza_dados(int token);
+void erro(string s);
 
 /* Variaveis globais */
 string lexema;
@@ -514,9 +515,9 @@ map<int, string> nome_tokens = {
   {tk_string, "string"}
 };
 
-#line 518 "lex.yy.c"
+#line 519 "lex.yy.c"
 /* Definicoes regulares */
-#line 520 "lex.yy.c"
+#line 521 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -733,10 +734,10 @@ YY_DECL
 		}
 
 	{
-#line 57 "main.lex"
+#line 58 "tradutor.lex"
 
 
-#line 740 "lex.yy.c"
+#line 741 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -795,52 +796,52 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 59 "main.lex"
+#line 60 "tradutor.lex"
 { coluna_anterior = coluna_atual++; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 60 "main.lex"
+#line 61 "tradutor.lex"
 { coluna_anterior = coluna_atual; coluna_atual += 2; }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 61 "main.lex"
+#line 62 "tradutor.lex"
 { linha++; coluna_anterior = coluna_atual; coluna_atual = 1; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 62 "main.lex"
+#line 63 "tradutor.lex"
 { atualiza_dados(tk_print); return tk_print; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "main.lex"
+#line 64 "tradutor.lex"
 { atualiza_dados(tk_num); return tk_num; }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 64 "main.lex"
+#line 65 "tradutor.lex"
 { atualiza_dados(tk_string); return tk_string; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 65 "main.lex"
+#line 66 "tradutor.lex"
 { atualiza_dados(tk_id); return tk_id; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 67 "main.lex"
+#line 68 "tradutor.lex"
 { atualiza_dados(yytext[0]); return yytext[0]; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 69 "main.lex"
+#line 70 "tradutor.lex"
 ECHO;
 	YY_BREAK
-#line 844 "lex.yy.c"
+#line 845 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1845,40 +1846,33 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 69 "main.lex"
+#line 70 "tradutor.lex"
 
 
-/* Codigo auxiliar em C */
+/* Funcoes da gramatica criada */
 
-void atualiza_dados(int token) {
-  lexema = yytext;
-  coluna_anterior = coluna_atual;
-  coluna_atual += strlen(yytext); 
-}
-
-int proximo_token() {
-  return yylex();
-}
-
-void erro(string msg) {
-  cout << "*** Erro: ***" << endl
-       << "Linha: " << linha << ", coluna: " << coluna_anterior << endl
-       << msg << endl;
-  exit(1);
-}
-
-void print(string lexema) {
-  cout << lexema << " ";
-}
-
-string nome_token(int token) {
-  if(nome_tokens.find(token) != nome_tokens.end())
-    return nome_tokens[token];
-  else {
-    string r;
-    r = (char) token;
-    return "'" + r + "'";
+// Inicio do programa
+void S() {
+  if (token == tk_id) {
+    A();
+    casa(';');
+    S();
   }
+  if (token == tk_print) {
+    P();
+    casa(';');
+    S();
+  }
+}
+
+// Atribuicao
+void A() {
+  string temp = lexema; // guardamos o lexema pois a função 'casa' altera o seu valor.
+  casa(tk_id);
+  print(temp);
+  casa('=');
+  E();
+  print("=");
 }
 
 // Expressao
@@ -1902,37 +1896,6 @@ void E_linha() {
       E_linha(); 
       break;
   }
-}
-
-// Atribuicao
-void A() {
-  string temp = lexema; // guardamos o lexema pois a função 'casa' altera o seu valor.
-  casa(tk_id);
-  print(temp);
-  casa('=');
-  E();
-  print("=");
-}
-
-// Inicio do programa
-void S() {
-  if (token == tk_id) {
-    A();
-    casa(';');
-    S();
-  }
-  if (token == tk_print) {
-    P();
-    casa(';');
-    S();
-  }
-}
-
-// Print
-void P() {
-  casa(tk_print);
-  E();
-  print("print #");
 }
 
 // Expressao
@@ -1966,10 +1929,10 @@ void F() {
       if(token == '(') {
         casa('('); 
         if(token == ')'){
-            casa(')');
-            } else {
-                Args();
-                casa(')');
+          casa(')');
+          } else {
+              Args();
+              casa(')');
         }
         print(temp + " #"); // funcao
       } else {
@@ -1988,9 +1951,9 @@ void F() {
     }
       break;
     case tk_string: {
-        string temp = lexema;
-        casa(tk_string); 
-        print(temp); 
+      string temp = lexema;
+      casa(tk_string); 
+      print(temp); 
     }
       break;
     case '(': 
@@ -2020,6 +1983,20 @@ void F() {
   }
 }
 
+// Argumentos da funcao
+void Args() {
+  E();
+  Args_linha();
+}
+
+void Args_linha() {
+  if(token == ',') {
+    casa(',');
+    E();
+    Args_linha();
+  }
+}
+
 // Fatorial
 void Fat() {
   if(token == '!') {
@@ -2037,17 +2014,43 @@ void Pot() {
   }
 }
 
-// Argumentos da funcao
-void Args() {
+// Print
+void P() {
+  casa(tk_print);
   E();
-  Args_linha();
+  print("print #");
 }
 
-void Args_linha() {
-  if(token == ',') {
-    casa(',');
-    E();
-    Args_linha();
+/* Funcoes auxiliares */
+
+void print(string lexema) {
+  cout << lexema << " ";
+}
+
+void atualiza_dados(int token) {
+  lexema = yytext;
+  coluna_anterior = coluna_atual;
+  coluna_atual += strlen(yytext); 
+}
+
+int proximo_token() {
+  return yylex();
+}
+
+void erro(string msg) {
+  cout << "*** Erro: ***" << endl
+       << "Linha: " << linha << ", coluna: " << coluna_anterior << endl
+       << msg << endl;
+  exit(1);
+}
+
+string nome_token(int token) {
+  if(nome_tokens.find(token) != nome_tokens.end())
+    return nome_tokens[token];
+  else {
+    string r;
+    r = (char) token;
+    return "'" + r + "'";
   }
 }
 

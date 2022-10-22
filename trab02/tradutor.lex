@@ -23,6 +23,7 @@ void P();           // print
 void casa(int);
 void print(string);
 void atualiza_dados(int token);
+void erro(string s);
 
 /* Variaveis globais */
 string lexema;
@@ -68,37 +69,30 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 
 %%
 
-/* Codigo auxiliar em C */
+/* Funcoes da gramatica criada */
 
-void atualiza_dados(int token) {
-  lexema = yytext;
-  coluna_anterior = coluna_atual;
-  coluna_atual += strlen(yytext); 
-}
-
-int proximo_token() {
-  return yylex();
-}
-
-void erro(string msg) {
-  cout << "*** Erro: ***" << endl
-       << "Linha: " << linha << ", coluna: " << coluna_anterior << endl
-       << msg << endl;
-  exit(1);
-}
-
-void print(string lexema) {
-  cout << lexema << " ";
-}
-
-string nome_token(int token) {
-  if(nome_tokens.find(token) != nome_tokens.end())
-    return nome_tokens[token];
-  else {
-    string r;
-    r = (char) token;
-    return "'" + r + "'";
+// Inicio do programa
+void S() {
+  if (token == tk_id) {
+    A();
+    casa(';');
+    S();
   }
+  if (token == tk_print) {
+    P();
+    casa(';');
+    S();
+  }
+}
+
+// Atribuicao
+void A() {
+  string temp = lexema; // guardamos o lexema pois a função 'casa' altera o seu valor.
+  casa(tk_id);
+  print(temp);
+  casa('=');
+  E();
+  print("=");
 }
 
 // Expressao
@@ -122,37 +116,6 @@ void E_linha() {
       E_linha(); 
       break;
   }
-}
-
-// Atribuicao
-void A() {
-  string temp = lexema; // guardamos o lexema pois a função 'casa' altera o seu valor.
-  casa(tk_id);
-  print(temp);
-  casa('=');
-  E();
-  print("=");
-}
-
-// Inicio do programa
-void S() {
-  if (token == tk_id) {
-    A();
-    casa(';');
-    S();
-  }
-  if (token == tk_print) {
-    P();
-    casa(';');
-    S();
-  }
-}
-
-// Print
-void P() {
-  casa(tk_print);
-  E();
-  print("print #");
 }
 
 // Expressao
@@ -186,10 +149,10 @@ void F() {
       if(token == '(') {
         casa('('); 
         if(token == ')'){
-            casa(')');
-            } else {
-                Args();
-                casa(')');
+          casa(')');
+          } else {
+              Args();
+              casa(')');
         }
         print(temp + " #"); // funcao
       } else {
@@ -208,9 +171,9 @@ void F() {
     }
       break;
     case tk_string: {
-        string temp = lexema;
-        casa(tk_string); 
-        print(temp); 
+      string temp = lexema;
+      casa(tk_string); 
+      print(temp); 
     }
       break;
     case '(': 
@@ -240,6 +203,20 @@ void F() {
   }
 }
 
+// Argumentos da funcao
+void Args() {
+  E();
+  Args_linha();
+}
+
+void Args_linha() {
+  if(token == ',') {
+    casa(',');
+    E();
+    Args_linha();
+  }
+}
+
 // Fatorial
 void Fat() {
   if(token == '!') {
@@ -257,17 +234,43 @@ void Pot() {
   }
 }
 
-// Argumentos da funcao
-void Args() {
+// Print
+void P() {
+  casa(tk_print);
   E();
-  Args_linha();
+  print("print #");
 }
 
-void Args_linha() {
-  if(token == ',') {
-    casa(',');
-    E();
-    Args_linha();
+/* Funcoes auxiliares */
+
+void print(string lexema) {
+  cout << lexema << " ";
+}
+
+void atualiza_dados(int token) {
+  lexema = yytext;
+  coluna_anterior = coluna_atual;
+  coluna_atual += strlen(yytext); 
+}
+
+int proximo_token() {
+  return yylex();
+}
+
+void erro(string msg) {
+  cout << "*** Erro: ***" << endl
+       << "Linha: " << linha << ", coluna: " << coluna_anterior << endl
+       << msg << endl;
+  exit(1);
+}
+
+string nome_token(int token) {
+  if(nome_tokens.find(token) != nome_tokens.end())
+    return nome_tokens[token];
+  else {
+    string r;
+    r = (char) token;
+    return "'" + r + "'";
   }
 }
 
