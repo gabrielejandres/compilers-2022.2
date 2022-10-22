@@ -1882,7 +1882,8 @@ void E() {
 }
 
 void E_linha() {
-  switch( token ) {
+  printf("E_linha %c FIM", token);
+  switch(token) {
     case '+' : 
       casa('+'); 
       T(); 
@@ -1930,9 +1931,9 @@ void F() {
         casa('('); 
         if(token == ')'){
           casa(')');
-          } else {
-              Args();
-              casa(')');
+        } else {
+          Args();
+          casa(')');
         }
         print(temp + " #"); // funcao
       } else {
