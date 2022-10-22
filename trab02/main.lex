@@ -22,25 +22,19 @@ void P();           // print
 /* Funcoes auxiliares */
 void casa(int);
 void print(string);
-int tk(int token);
+void atualiza_dados(int token);
 
 /* Variaveis globais */
 string lexema;
 int token;
 int linha = 1, coluna_atual = 1, coluna_anterior = 0;
 enum {
-  tk_int = 256,
-  tk_char,
-  tk_double,
-  tk_id,
+  tk_id = 256,
   tk_num,
   tk_print,
   tk_string
 };
 map<int, string> nome_tokens = {
-  {tk_int, "int"},
-  {tk_char, "char"},
-  {tk_double, "double"},
   {tk_id, "nome de identificador"},
   {tk_num, "numero"},
   {tk_print, "print"},
@@ -65,27 +59,24 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 " "  		      { coluna_anterior = coluna_atual++; }
 "\t"		      { coluna_anterior = coluna_atual; coluna_atual += 2; }
 "\n"          { linha++; coluna_anterior = coluna_atual; coluna_atual = 1; }
-"char"		    { lexema = yytext; return tk(tk_char); }
-"int"		      { lexema = yytext; return tk(tk_int); }
-"double"	    { lexema = yytext; return tk(tk_double); }
-"print"       { lexema = yytext; return tk(tk_print); }
-{NUM} 		    { lexema = yytext; return tk(tk_num); }
-{STRING}      { lexema = yytext; return tk(tk_string); }
-{ID}		      { lexema = yytext; return tk(tk_id); }
+"print"       { atualiza_dados(tk_print); return tk_print; }
+{NUM} 		    { atualiza_dados(tk_num); return tk_num; }
+{STRING}      { atualiza_dados(tk_string); return tk_string; }
+{ID}		      { atualiza_dados(tk_id); return tk_id; }
 
-.		          { lexema = yytext; return tk(yytext[0]); }
+.		          { atualiza_dados(yytext[0]); return yytext[0]; }
 
 %%
 
 /* Codigo auxiliar em C */
 
-int tk(int token) {
+void atualiza_dados(int token) {
+  lexema = yytext;
   coluna_anterior = coluna_atual;
   coluna_atual += strlen(yytext); 
-  return token;
 }
 
-int next_token() {
+int proximo_token() {
   return yylex();
 }
 
@@ -229,10 +220,14 @@ void F() {
       Fat();
       Pot();
       break;
-    case '+':
+    case '+': {
       casa('+'); 
+      int temp = token;
       F(); 
-      print("+"); 
+      if (temp != '-' && temp != '+') {
+        print("+"); 
+      }
+    }
       break;
     case '-':
       casa('-'); 
@@ -278,7 +273,7 @@ void Args_linha() {
 
 void casa(int esperado) {
   if(token == esperado)
-    token = next_token();
+    token = proximo_token();
   else 
     erro("Esperado " + nome_token(esperado) + ", encontrado: " + nome_token(token));
 }
@@ -286,7 +281,7 @@ void casa(int esperado) {
 auto f = &yyunput;
 
 int main() {
-  token = next_token();
+  token = proximo_token();
   S();
   return 0;
 }
