@@ -9,13 +9,15 @@ using namespace std;
 void S();         // inicio do programa
 void A();         // atribuicao
 void E();         // expressao
-void E_linha();   // eliminacao de recursividade a esquerda em E
+void E_linha();      // eliminacao de recursividade a esquerda em E
 void T();         
-void T_linha();   // eliminacao de recursividade a esquerda em T
+void T_linha();     // eliminacao de recursividade a esquerda em T
 void F();
 void Args();        // argumentos de funcao
-void Args_linha(); // eliminacao de inicio comum em Args
-void P();          // print
+void Args_linha();  // eliminacao de inicio comum em Args
+void Fat();         // fatorial
+void Pot();         // potencia
+void P();           // print
 
 /* Funcoes auxiliares */
 void casa(int);
@@ -150,6 +152,7 @@ void S() {
   }
   if (token == tk_print) {
     P();
+    casa(';');
     S();
   }
 }
@@ -159,7 +162,6 @@ void P() {
   casa(tk_print);
   E();
   print("print #");
-  casa(';');
 }
 
 // Expressao
@@ -201,13 +203,17 @@ void F() {
         print(temp + " #"); // funcao
       } else {
         print(temp + " @"); // variavel
-      }  
+      }
+      Fat();  
+      Pot();
     } 
       break;
     case tk_num: {
       string temp = lexema;
       casa(tk_num); 
       print(temp); 
+      Fat();
+      Pot();
     }
       break;
     case tk_string: {
@@ -220,6 +226,8 @@ void F() {
       casa( '(' ); 
       E(); 
       casa( ')' ); 
+      Fat();
+      Pot();
       break;
     case '+':
       casa('+'); 
@@ -234,6 +242,23 @@ void F() {
       break;
     default:
       erro("Operando esperado, encontrado " + lexema);
+  }
+}
+
+// Fatorial
+void Fat() {
+  if(token == '!') {
+    casa('!');
+    print("fat #");
+  }
+}
+
+// Potencia (exponencial)
+void Pot() {
+  if(token == '^') {
+    casa('^');
+    F();
+    print("^");
   }
 }
 

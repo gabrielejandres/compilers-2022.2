@@ -490,13 +490,15 @@ using namespace std;
 void S();         // inicio do programa
 void A();         // atribuicao
 void E();         // expressao
-void E_linha();   // eliminacao de recursividade a esquerda em E
+void E_linha();      // eliminacao de recursividade a esquerda em E
 void T();         
-void T_linha();   // eliminacao de recursividade a esquerda em T
+void T_linha();     // eliminacao de recursividade a esquerda em T
 void F();
 void Args();        // argumentos de funcao
-void Args_linha(); // eliminacao de inicio comum em Args
-void P();          // print
+void Args_linha();  // eliminacao de inicio comum em Args
+void Fat();         // fatorial
+void Pot();         // potencia
+void P();           // print
 
 /* Funcoes auxiliares */
 void casa(int);
@@ -526,9 +528,9 @@ map<int, string> nome_tokens = {
   {tk_string, "string"}
 };
 
-#line 530 "lex.yy.c"
-/* Definicoes regulares */
 #line 532 "lex.yy.c"
+/* Definicoes regulares */
+#line 534 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -745,10 +747,10 @@ YY_DECL
 		}
 
 	{
-#line 61 "main.lex"
+#line 63 "main.lex"
 
 
-#line 752 "lex.yy.c"
+#line 754 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -807,67 +809,67 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 63 "main.lex"
+#line 65 "main.lex"
 { coluna_anterior = coluna_atual++; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 64 "main.lex"
+#line 66 "main.lex"
 { coluna_anterior = coluna_atual; coluna_atual += 2; }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 65 "main.lex"
+#line 67 "main.lex"
 { linha++; coluna_anterior = coluna_atual; coluna_atual = 1; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 66 "main.lex"
+#line 68 "main.lex"
 { lexema = yytext; return tk(tk_char); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 67 "main.lex"
+#line 69 "main.lex"
 { lexema = yytext; return tk(tk_int); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 68 "main.lex"
+#line 70 "main.lex"
 { lexema = yytext; return tk(tk_double); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 69 "main.lex"
+#line 71 "main.lex"
 { lexema = yytext; return tk(tk_print); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 70 "main.lex"
+#line 72 "main.lex"
 { lexema = yytext; return tk(tk_num); }
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 71 "main.lex"
+#line 73 "main.lex"
 { lexema = yytext; return tk(tk_string); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 72 "main.lex"
+#line 74 "main.lex"
 { lexema = yytext; return tk(tk_id); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 74 "main.lex"
+#line 76 "main.lex"
 { lexema = yytext; return tk(yytext[0]); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 76 "main.lex"
+#line 78 "main.lex"
 ECHO;
 	YY_BREAK
-#line 871 "lex.yy.c"
+#line 873 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1872,7 +1874,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 76 "main.lex"
+#line 78 "main.lex"
 
 
 /* Codigo auxiliar em C */
@@ -1950,6 +1952,7 @@ void S() {
   }
   if (token == tk_print) {
     P();
+    casa(';');
     S();
   }
 }
@@ -1959,7 +1962,6 @@ void P() {
   casa(tk_print);
   E();
   print("print #");
-  casa(';');
 }
 
 // Expressao
@@ -2001,13 +2003,17 @@ void F() {
         print(temp + " #"); // funcao
       } else {
         print(temp + " @"); // variavel
-      }  
+      }
+      Fat();  
+      Pot();
     } 
       break;
     case tk_num: {
       string temp = lexema;
       casa(tk_num); 
       print(temp); 
+      Fat();
+      Pot();
     }
       break;
     case tk_string: {
@@ -2020,6 +2026,8 @@ void F() {
       casa( '(' ); 
       E(); 
       casa( ')' ); 
+      Fat();
+      Pot();
       break;
     case '+':
       casa('+'); 
@@ -2034,6 +2042,23 @@ void F() {
       break;
     default:
       erro("Operando esperado, encontrado " + lexema);
+  }
+}
+
+// Fatorial
+void Fat() {
+  if(token == '!') {
+    casa('!');
+    print("fat #");
+  }
+}
+
+// Potencia (exponencial)
+void Pot() {
+  if(token == '^') {
+    casa('^');
+    F();
+    print("^");
   }
 }
 

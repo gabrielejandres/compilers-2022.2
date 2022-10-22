@@ -10,14 +10,19 @@ T -> F T'
 T' -> * F { Print( "*"); } T'
     | / F { Print( "/"); } T'
     | ε
-F -> id F'
-   | num { Print( lexema ); }
-   | ( E )
-   | +F
-   | -F
-   | Fat
+F -> id F' Fat Pot
+   | num { Print( lexema ); } Fat Pot
+   | ( E ) Fat Pot
+   | +F Fat Pot
+   | -F Fat Pot
+Fat -> !
+   | ε
+Pot -> ^ F
+   | ε
 F' -> (F"
-   |
+   | ε
 F" -> )
    | Args )
-Args -> 
+Args -> E Args'
+Args' -> Args',
+   | ε
