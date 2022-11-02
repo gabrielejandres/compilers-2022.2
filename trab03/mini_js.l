@@ -16,8 +16,17 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 {DOUBLE}   { yylval.c = yytext; 
              return NUM; }
 
-"let"	   { yylval.c = "x"; 
+"let"	   { yylval.c = yytext; 
              return LET; }
+
+"{}"       { yylval.c = yytext; 
+             return OBJ; }
+
+"[]"       { yylval.c = yytext;
+            return ARRAY; }
+
+"+="        { yylval.c = yytext;
+            return ADD; }
 
 {ID}       { yylval.c = yytext; 
              return ID; }
