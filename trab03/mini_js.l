@@ -13,28 +13,40 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 {DELIM}    { }
 
              
-{DOUBLE}   { yylval.c = yytext; 
+{DOUBLE}   { atributos_token(NUM);
              return NUM; }
 
-"let"	   { yylval.c = yytext; 
+"let"	   { atributos_token(LET);
              return LET; }
 
-"{}"       { yylval.c = yytext; 
+"{}"       { atributos_token(OBJ);
              return OBJ; }
 
-"[]"       { yylval.c = yytext;
+"[]"       { atributos_token(ARRAY);
             return ARRAY; }
 
-"+="        { yylval.c = yytext;
+"+="        { atributos_token(ADD);
             return ADD; }
 
-{ID}       { yylval.c = yytext; 
+"if"    { atributos_token(IF);
+            return IF; }
+
+"else"    { atributos_token(ELSE);
+            return ELSE; }
+
+"=="   { atributos_token(IGUAL);
+            return IGUAL; }
+
+"!="   { atributos_token(DIF);
+            return DIF; }
+
+{ID}       { atributos_token(ID);
              return ID; }
 
-{STRING}   { yylval.c = yytext;
+{STRING}   { atributos_token(STRING);
              return STRING; }
 
-.          { yylval.c = yytext;
+.          { atributos_token(yytext[0]);
 	     return yytext[0]; }
 
 %%
