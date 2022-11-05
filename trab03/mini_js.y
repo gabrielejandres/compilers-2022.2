@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include<map>
+#include <stdbool.h>
 
 using namespace std;
 
@@ -33,11 +35,17 @@ int yylex();
 int yyparse();
 void yyerror(const char *);
 void print_prod(const char *);
-void atributos_token(int token);
+void atualiza_atributos_token(int token);
 vector<string> concatena(vector<string> a, vector<string> b);
 vector<string> operator+(vector<string> a, vector<string> b);
 vector<string> operator+(vector<string> a, string b);
 vector<string> to_vector(string s);
+string gera_label(string prefixo);
+vector<string> resolve_enderecos(vector<string> entrada);
+void atualiza_variaveis_declaradas(string var);
+void verifica_variaveis_declaradas(string var);
+
+map<string, int> variaveis_declaradas;
 
 %}
 
@@ -55,6 +63,7 @@ vector<string> to_vector(string s);
 %token ELSE
 %token IGUAL
 %token DIF
+%token INC
 
 // Start indica o simbolo inicial da gramatica
 %start s
@@ -66,7 +75,7 @@ vector<string> to_vector(string s);
 
 %%
 
-s : cmds { print_prod("s -> cmds;"); for (string c : $1.c) { cout << c; } cout << "." << endl; }
+s : cmds { print_prod("s -> cmds"); /*vector<string> vec = resolve_enderecos($1.c);*/ for (string c : $1.c) { cout << c; } cout << "." << endl; }
   ;
 
 cmds : cmd ';' cmds   { print_prod("cmds -> cmd ; cmds"); $$.c = $1.c + "\n" + $3.c; }
@@ -75,11 +84,11 @@ cmds : cmd ';' cmds   { print_prod("cmds -> cmd ; cmds"); $$.c = $1.c + "\n" + $
 
 cmd : atr      { print_prod("cmd -> atr"); }
   | add      { print_prod("cmd -> add"); }
-  // | condicional      { print_prod("cmd -> condicional"); }
+  | condicional      { print_prod("cmd -> condicional"); }
   | LET decl { print_prod("cmd -> LET decl"); $$.c = $2.c; }
   ;
 
-atr: ID '=' exp     { print_prod("atr -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
+atr: ID '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
   | ID '=' atr_id      { print_prod("atr -> ID = atr"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
   ;
 
@@ -96,36 +105,29 @@ exp_id: val '+' exp_id { print_prod("exp_id -> exp + exp"); $$.c = $1.c + " + " 
   | val
   ;
 
-decl: ID '=' exp fim_decl { print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "& " + to_vector($1.v) + " " + $3.c + " = ^ " + $4.c; }
-  | ID fim_decl         { print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "& " + $2.c; }
+decl: ID '=' exp fim_decl { atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "& " + to_vector($1.v) + " " + $3.c + " = ^ " + $4.c; }
+  | ID fim_decl         { atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "& " + $2.c; }
   ;
 
 fim_decl: ',' decl          { print_prod("fim_decl -> , decl"); $$.c = to_vector(" ") + $2.c; }
   |                    { print_prod("fim_decl -> epsilon"); $$.c = to_vector(""); }
   ;
 
-// condicional: IF '(' condicao ')' '{' bloco '}' ELSE '{' bloco '}'	
-// 	| IF '(' condicao ')' '{' bloco '}'	
-//   | IF '(' condicao ')' bloco ELSE
-//   | IF '(' condicao ')' bloco
-// 	;
+condicional: 
+  | IF '(' condicao ')' corpo ELSE corpo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string then = gera_label("then"); string end_if = gera_label("end_if"); $$.c = $3.c + then + "?" + $7.c + end_if + "#" + (":" + then) + $5.c + (":" + end_if); }
+	| IF '(' condicao ')' corpo	{ print_prod("condicional -> IF (condicao) corpo"); string end_if = gera_label("end_if"); $$.c = $3.c + "!" + end_if + "?" + $5.c + (":" + end_if);}
+	;
 
-// condicao: exp '>' exp { print_prod("condicao -> exp > exp"); $$.c = $1.c + " " + $3.c + " >"; }
-//   | exp '<' exp { print_prod("condicao -> exp < exp"); $$.c = $1.c + " " + $3.c + " <"; }
-//   | exp IGUAL exp { print_prod("condicao -> exp EQ exp"); $$.c = $1.c + " " + $3.c + " ="; }
-//   | exp DIF exp { print_prod("condicao -> exp NE exp"); $$.c = $1.c + " " + $3.c + " !="; }
-//   | exp { print_prod("condicao -> exp"); }
-//   ;
+corpo: '{' cmds '}'           { print_prod("corpo -> { cmds }"); $$.c = $2.c; }
+  | cmd ';'
+  ;
 
-// bloco: bloco conteudo ';'
-//   | 
-//   ;
-
-// conteudo: atr { print_prod("conteudo -> atr"); }
-//   | add       { print_prod("conteudo -> add"); }
-//   | condicional { print_prod("conteudo -> condicional"); }
-//   | LET decl    { print_prod("conteudo -> LET decl"); $$.c = $2.c; }
-//   ;
+condicao: exp '>' exp   { print_prod("condicao -> exp > exp"); $$.c = $1.c + $3.c + ">"; }
+  | exp '<' exp         { print_prod("condicao -> exp < exp"); $$.c = $1.c + $3.c + "<"; }
+  | exp IGUAL exp       { print_prod("condicao -> exp IGUAL exp"); $$.c = $1.c + $3.c + "=="; }
+  | exp DIF exp         { print_prod("condicao -> exp DIF exp"); $$.c = $1.c + $3.c + "!="; }
+  | exp                 { print_prod("condicao -> exp"); $$.c = $1.c; }
+  ;
 
 exp: exp '+' exp { print_prod("exp -> exp + exp"); $$.c = $1.c + " " + $3.c + " +"; }
   | exp '-' exp { print_prod("exp -> exp - exp"); $$.c = $1.c + " " + $3.c + " -"; }
@@ -135,12 +137,12 @@ exp: exp '+' exp { print_prod("exp -> exp + exp"); $$.c = $1.c + " " + $3.c + " 
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
-  | NUM         { print_prod("val -> NUM"); }
+  | NUM           { print_prod("val -> NUM"); }
   | '(' exp ')'   { print_prod("val -> ( exp )"); $$ = $2; }
-  | OBJ       { print_prod("val -> OBJ"); }
-  | ARRAY     { print_prod("val -> ARRAY"); }
-  | STRING      { print_prod("val -> STRING"); }
-  // | ID INC      { print_prod("val -> ID INC"); $$.c = $1.c + "@" + " 1 + = ^"; }
+  | OBJ           { print_prod("val -> OBJ"); }
+  | ARRAY         { print_prod("val -> ARRAY"); }
+  | STRING        { print_prod("val -> STRING"); }
+  | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + to_vector($1.v) + "@" + "1+=^"; }
   ;
 
 %%
@@ -157,7 +159,27 @@ void yyerror(const char* st) {
 }
 
 void print_prod(const char *s) {
-  // printf("%s \n", s);
+  cout << s << endl;
+}
+
+void atualiza_variaveis_declaradas(string var) {
+  auto it = variaveis_declaradas.find(var);
+
+  if (it == variaveis_declaradas.end()) {
+    variaveis_declaradas[var] = yylloc.first_line;
+  } else {
+    cout << "Erro: a variável '" << var << "' já foi declarada na linha " << variaveis_declaradas[var] << "." << endl;
+    exit(1);
+  }
+}
+
+void verifica_variaveis_declaradas(string var) {
+  auto it = variaveis_declaradas.find(var);
+
+  if (it == variaveis_declaradas.end()) {
+    cout << "Erro: a variável '" << var << "' não foi declarada." << endl;
+    exit(1);
+  }
 }
 
 vector<string> to_vector(string s) {
@@ -193,11 +215,33 @@ vector<string> operator+(string a, vector<string> b) {
   return b + a;
 }
 
-void atributos_token(int token) {
+void atualiza_atributos_token(int token) {
   yylval.v = yytext;
   yylval.c.clear();
   yylval.c.push_back(yytext);
   // cout << 'Token: ' << token << "|" << yytext << "|" << endl;
+}
+
+string gera_label(string prefixo) {
+  static int n = 0;
+  return prefixo + "_" + to_string(++n) + ":";
+}
+
+vector<string> resolve_enderecos(vector<string> entrada) {
+  map<string,int> label;
+  vector<string> saida;
+
+  for(int i = 0; i < entrada.size(); i++) 
+    if(entrada[i][0] == ':') 
+        label[entrada[i].substr(1)] = saida.size();
+    else
+      saida.push_back(entrada[i]);
+  
+  for(int i = 0; i < saida.size(); i++) 
+    if(label.count(saida[i]) > 0)
+        saida[i] = to_string(label[saida[i]]);
+    
+  return saida;
 }
 
 int main(int argc, char* argv[]) {

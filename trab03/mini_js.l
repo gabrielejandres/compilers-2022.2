@@ -13,40 +13,43 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 {DELIM}    { }
 
              
-{DOUBLE}   { atributos_token(NUM);
+{DOUBLE}   { atualiza_atributos_token(NUM);
              return NUM; }
 
-"let"	   { atributos_token(LET);
+"let"	   { atualiza_atributos_token(LET);
              return LET; }
 
-"{}"       { atributos_token(OBJ);
+"{}"       { atualiza_atributos_token(OBJ);
              return OBJ; }
 
-"[]"       { atributos_token(ARRAY);
+"[]"       { atualiza_atributos_token(ARRAY);
             return ARRAY; }
 
-"+="        { atributos_token(ADD);
+"+="        { atualiza_atributos_token(ADD);
             return ADD; }
 
-"if"    { atributos_token(IF);
+"++"        { atualiza_atributos_token(INC);
+            return INC; }
+
+"if"    { atualiza_atributos_token(IF);
             return IF; }
 
-"else"    { atributos_token(ELSE);
+"else"    { atualiza_atributos_token(ELSE);
             return ELSE; }
 
-"=="   { atributos_token(IGUAL);
+"=="   { atualiza_atributos_token(IGUAL);
             return IGUAL; }
 
-"!="   { atributos_token(DIF);
+"!="   { atualiza_atributos_token(DIF);
             return DIF; }
 
-{ID}       { atributos_token(ID);
+{ID}       { atualiza_atributos_token(ID);
              return ID; }
 
-{STRING}   { atributos_token(STRING);
+{STRING}   { atualiza_atributos_token(STRING);
              return STRING; }
 
-.          { atributos_token(yytext[0]);
+.          { atualiza_atributos_token(yytext[0]);
 	     return yytext[0]; }
 
 %%
