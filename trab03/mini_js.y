@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include<map>
-#include <stdbool.h>
 
 using namespace std;
 
@@ -72,6 +71,7 @@ map<string, int> variaveis_declaradas;
 %right '=' 
 %left '+' '-'
 %left '*' '/'
+%right ADD INC
 
 %%
 
@@ -89,7 +89,21 @@ cmd : atr      { print_prod("cmd -> atr"); }
   ;
 
 atr: ID '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
-  | ID '=' atr_id      { print_prod("atr -> ID = atr"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
+  | ID '=' atr_id      { verifica_variaveis_declaradas($1.v); print_prod("atr -> ID = atr"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
+  | atr_obj         { print_prod("atr -> atr_obj"); }
+  | atr_array         { print_prod("atr -> atr_array"); }
+  ;
+
+atr_obj: ID '.' prop '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . ID = exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + $5.c + " [=] ^"; }
+  | ID '.' prop ADD exp          { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . ID ADD exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + to_vector($1.v) + " @ " + $3.c + "[@] " + $5.c + " + [=] ^"; }
+  ;
+
+atr_array: ID '[' prop ']' '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_arr -> ID [ exp ] = exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + $6.c + " [=] ^"; }
+  ;
+
+prop: ID  { print_prod("prop -> ID"); }
+  | exp { print_prod("prop -> exp"); }
+  | ID '[' prop ']' { print_prod("prop -> ID [ prop ]"); $$.c = to_vector($1.v) + "[@] " + $3.c; }
   ;
 
 // nova regra para adicao do @ no final para pegar o valor do id
@@ -133,16 +147,18 @@ exp: exp '+' exp { print_prod("exp -> exp + exp"); $$.c = $1.c + " " + $3.c + " 
   | exp '-' exp { print_prod("exp -> exp - exp"); $$.c = $1.c + " " + $3.c + " -"; }
   | exp '*' exp { print_prod("exp -> exp * exp"); $$.c = $1.c + " " + $3.c + " *"; }
   | exp '/' exp { print_prod("exp -> exp / exp"); $$.c = $1.c + " " + $3.c + " /"; }
+  | ID '.' ID     { print_prod("exp -> ID . prop"); $$.c = to_vector($1.v) + "@ " + $3.v + "[@] "; }
   | val         { print_prod("exp -> val"); }
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
   | NUM           { print_prod("val -> NUM"); }
+  | '-' NUM       { print_prod("val -> - NUM"); $$.c = to_vector("0") + " " + $2.c + " -" ; }
   | '(' exp ')'   { print_prod("val -> ( exp )"); $$ = $2; }
   | OBJ           { print_prod("val -> OBJ"); }
   | ARRAY         { print_prod("val -> ARRAY"); }
   | STRING        { print_prod("val -> STRING"); }
-  | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + to_vector($1.v) + "@" + "1+=^"; }
+  | ID INC        { print_prod("exp -> ID INC"); $$.c = to_vector($1.v) + "@ " + to_vector($1.v) + " " + to_vector($1.v) + "@ " + "1 + = ^"; }
   ;
 
 %%
