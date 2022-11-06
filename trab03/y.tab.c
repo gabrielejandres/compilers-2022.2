@@ -1598,7 +1598,7 @@ yyreduce:
 
   case 12:
 #line 99 "mini_js.y"
-                              { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID = exp"); yyval.c = to_vector(yyvsp[-2].v) + " " + yyvsp[0].c + " = ^"; }
+                              { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID = exp"); yyval.c = to_vector(yyvsp[-2].v) + yyvsp[0].c + " = ^"; }
 #line 1603 "y.tab.c"
     break;
 
@@ -1610,7 +1610,7 @@ yyreduce:
 
   case 14:
 #line 101 "mini_js.y"
-                           { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID ADD exp_id"); yyval.c = to_vector(yyvsp[-2].v) + to_vector(yyvsp[-2].v) + " @ " + yyvsp[0].c + " + = ^"; }
+                              { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID ADD exp_id"); yyval.c = to_vector(yyvsp[-2].v) + " " + to_vector(yyvsp[-2].v) + " @ " + yyvsp[0].c + " + = ^"; }
 #line 1615 "y.tab.c"
     break;
 
@@ -1646,7 +1646,7 @@ yyreduce:
 
   case 20:
 #line 114 "mini_js.y"
-                    { print_prod("prop -> ID [ exp ]"); yyval.c = to_vector(yyvsp[-3].v) + " [@] " + yyvsp[-1].c; }
+                    { print_prod("prop -> ID [ exp ]"); yyval.c = to_vector(yyvsp[-3].v) + " [@] " + yyvsp[-1].c + " "; }
 #line 1651 "y.tab.c"
     break;
 
@@ -1772,7 +1772,7 @@ yyreduce:
 
   case 41:
 #line 149 "mini_js.y"
-                    { print_prod("exp -> ID [ exp ]"); yyval.c = to_vector(yyvsp[-3].v) + " [@] " + yyvsp[-1].c; }
+                    { print_prod("exp -> ID [ exp ]"); yyval.c = to_vector(yyvsp[-3].v) + " [@] " + yyvsp[-1].c + " "; }
 #line 1777 "y.tab.c"
     break;
 

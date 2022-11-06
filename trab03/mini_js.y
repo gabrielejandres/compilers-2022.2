@@ -111,7 +111,7 @@ atr_obj: ID '.' prop '=' exp     { verifica_variaveis_declaradas($1.v); print_pr
   ;
 
 prop: ID            { print_prod("prop -> ID"); }
-  | ID '[' exp ']'  { print_prod("prop -> ID [ exp ]"); $$.c = to_vector($1.v) + " [@] " + $3.c; }
+  | ID '[' exp ']'  { print_prod("prop -> ID [ exp ]"); $$.c = to_vector($1.v) + " [@] " + $3.c + " "; }
   ;
 
 atr_array: ID '[' exp ']' '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_array -> ID [ exp ] = exp"); $$.c = to_vector($1.v) + " @ " + $3.c + $6.c + " [=] ^"; }
@@ -146,7 +146,7 @@ exp: exp '+' exp    { print_prod("exp -> exp + exp"); $$.c = $1.c + " " + $3.c +
   | exp '*' exp     { print_prod("exp -> exp * exp"); $$.c = $1.c + " " + $3.c + " *"; }
   | exp '/' exp     { print_prod("exp -> exp / exp"); $$.c = $1.c + " " + $3.c + " /"; }
   | ID '.' ID       { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + " @ " + $3.v + " [@]"; }
-  | ID '[' exp ']'  { print_prod("exp -> ID [ exp ]"); $$.c = to_vector($1.v) + " [@] " + $3.c; }
+  | ID '[' exp ']'  { print_prod("exp -> ID [ exp ]"); $$.c = to_vector($1.v) + " [@] " + $3.c + " "; }
   | val             { print_prod("exp -> val"); }
   ;
 
