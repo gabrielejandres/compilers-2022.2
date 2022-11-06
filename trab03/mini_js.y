@@ -83,44 +83,38 @@ cmds : cmd ';' cmds   { print_prod("cmds -> cmd ; cmds"); $$.c = $1.c + "\n" + $
   ;
 
 cmd : atr      { print_prod("cmd -> atr"); }
-  | add      { print_prod("cmd -> add"); }
   | condicional      { print_prod("cmd -> condicional"); }
   | LET decl { print_prod("cmd -> LET decl"); $$.c = $2.c; }
   ;
 
-atr: ID '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
-  | ID '=' atr_id      { verifica_variaveis_declaradas($1.v); print_prod("atr -> ID = atr"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
+atr: atr_id         { print_prod("atr -> atr_id"); }
   | atr_obj         { print_prod("atr -> atr_obj"); }
-  | atr_array         { print_prod("atr -> atr_array"); }
+  | atr_array       { print_prod("atr -> atr_array"); }
   ;
 
-atr_obj: ID '.' prop_obj '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . ID = exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + $5.c + " [=] ^"; }
-  | ID '.' prop_obj ADD exp          { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . ID ADD exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + to_vector($1.v) + " @ " + $3.c + "[@] " + $5.c + " + [=] ^"; }
-  ;
-
-atr_array: ID '[' prop ']' '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_arr -> ID [ exp ] = exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + $6.c + " [=] ^"; }
-  ;
-
-prop_obj: ID     { print_prod("prop_obj -> ID"); }
-  | ID '[' prop ']' { print_prod("prop -> ID [ prop ]"); $$.c = to_vector($1.v) + "[@] " + $3.c; }
-  ;
-
-prop: 
-  | exp { print_prod("prop -> exp"); }
-  | ID '[' prop ']' { print_prod("prop -> ID [ prop ]"); $$.c = to_vector($1.v) + "[@] " + $3.c; }
-  ;
+atr_id: ID '=' exp            { verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
+  | ID '=' atr_recursiva      { verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID = atr_recursiva"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
+  | ID ADD exp_id             { print_prod("atr_id -> ID ADD exp_id"); $$.c = to_vector($1.v) + " " + to_vector($1.v) + "@ " + $3.c + " + = ^ "; }
 
 // nova regra para adicao do @ no final para pegar o valor do id
-atr_id: ID '=' exp    { print_prod("atr_id -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ " + to_vector($1.v) + "@"; } 
-  | ID '=' atr_id      { print_prod("atr_id -> ID = atr_id"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
-  ;
-
-add: ID ADD exp_id { print_prod("add -> ID ADD exp_id"); $$.c = to_vector($1.v) + " " + to_vector($1.v) + "@ " + $3.c + " + = ^ "; }
+atr_recursiva: ID '=' exp    { print_prod("atr_recursiva -> ID = exp"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ " + to_vector($1.v) + "@"; } 
+  | ID '=' atr_recursiva      { print_prod("atr_recursiva -> ID = atr_recursiva"); $$.c = to_vector($1.v) + " " + $3.c + " = ^ "; }
   ;
 
 // nova regra para adicao do '+' apos o primeiro argumento
-exp_id: val '+' exp_id { print_prod("exp_id -> exp + exp"); $$.c = $1.c + " + " + $3.c; }
-  | val
+exp_id: val '+' exp_id  { print_prod("exp_id -> val + exp_id"); $$.c = $1.c + " + " + $3.c; }
+  | val                 { print_prod("exp_id -> val"); }
+  ;
+
+atr_obj: ID '.' prop '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . prop = exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + $5.c + " [=] ^"; }
+  | ID '.' prop ADD exp          { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . prop ADD exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + to_vector($1.v) + " @ " + $3.c + "[@] " + $5.c + " + [=] ^"; }
+  ;
+
+prop: ID            { print_prod("prop -> ID"); }
+  | ID '[' exp ']'  { print_prod("prop -> ID [ exp ]"); $$.c = to_vector($1.v) + "[@] " + $3.c; }
+  ;
+
+atr_array: ID '[' exp ']' '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_array -> ID [ exp ] = exp"); $$.c = to_vector($1.v) + "@ " + $3.c + " " + $6.c + " [=] ^"; }
   ;
 
 decl: ID '=' exp fim_decl { atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "& " + to_vector($1.v) + " " + $3.c + " = ^ " + $4.c; }
@@ -137,7 +131,7 @@ condicional:
 	;
 
 corpo: '{' cmds '}'           { print_prod("corpo -> { cmds }"); $$.c = $2.c; }
-  | cmd ';'
+  | cmd ';'                   { print_prod("corpo -> cmd ;"); }
   ;
 
 condicao: exp '>' exp   { print_prod("condicao -> exp > exp"); $$.c = $1.c + $3.c + ">"; }
@@ -147,12 +141,13 @@ condicao: exp '>' exp   { print_prod("condicao -> exp > exp"); $$.c = $1.c + $3.
   | exp                 { print_prod("condicao -> exp"); $$.c = $1.c; }
   ;
 
-exp: exp '+' exp { print_prod("exp -> exp + exp"); $$.c = $1.c + " " + $3.c + " +"; }
-  | exp '-' exp { print_prod("exp -> exp - exp"); $$.c = $1.c + " " + $3.c + " -"; }
-  | exp '*' exp { print_prod("exp -> exp * exp"); $$.c = $1.c + " " + $3.c + " *"; }
-  | exp '/' exp { print_prod("exp -> exp / exp"); $$.c = $1.c + " " + $3.c + " /"; }
-  | ID '.' ID     { print_prod("exp -> ID . prop"); $$.c = to_vector($1.v) + "@ " + $3.v + "[@] "; }
-  | val         { print_prod("exp -> val"); }
+exp: exp '+' exp    { print_prod("exp -> exp + exp"); $$.c = $1.c + " " + $3.c + " +"; }
+  | exp '-' exp     { print_prod("exp -> exp - exp"); $$.c = $1.c + " " + $3.c + " -"; }
+  | exp '*' exp     { print_prod("exp -> exp * exp"); $$.c = $1.c + " " + $3.c + " *"; }
+  | exp '/' exp     { print_prod("exp -> exp / exp"); $$.c = $1.c + " " + $3.c + " /"; }
+  | ID '.' ID       { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@ " + $3.v + "[@] "; }
+  | ID '[' exp ']'  { print_prod("exp -> ID [ exp ]"); $$.c = to_vector($1.v) + "[@] " + $3.c; }
+  | val             { print_prod("exp -> val"); }
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
@@ -162,7 +157,7 @@ val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
   | OBJ           { print_prod("val -> OBJ"); }
   | ARRAY         { print_prod("val -> ARRAY"); }
   | STRING        { print_prod("val -> STRING"); }
-  | ID INC        { print_prod("exp -> ID INC"); $$.c = to_vector($1.v) + "@ " + to_vector($1.v) + " " + to_vector($1.v) + "@ " + "1 + = ^"; }
+  | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + "@ " + to_vector($1.v) + " " + to_vector($1.v) + "@ " + "1 + = ^"; }
   ;
 
 %%
