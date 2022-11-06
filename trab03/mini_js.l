@@ -37,6 +37,12 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 "else"    { atualiza_atributos_token(ELSE);
             return ELSE; }
 
+"while"    { atualiza_atributos_token(WHILE);
+            return WHILE; }
+
+"for"    { atualiza_atributos_token(FOR);
+            return FOR; }
+
 "=="   { atualiza_atributos_token(IGUAL);
             return IGUAL; }
 
