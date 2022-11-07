@@ -39,6 +39,7 @@ void atualiza_atributos_token(int token);
 vector<string> concatena(vector<string> a, vector<string> b);
 vector<string> operator+(vector<string> a, vector<string> b);
 vector<string> operator+(vector<string> a, string b);
+vector<string> operator+(string a, vector<string> b);
 vector<string> to_vector(string s);
 string gera_label(string prefixo);
 vector<string> resolve_enderecos(vector<string> entrada);
@@ -78,7 +79,7 @@ vector<string> epsilon;
 %left '+' '-'
 %left '*' '/'
 %right ADD INC
-%right ELSE '#' // conflito de shift reduce 
+%right ELSE 'T' // conflito de shift reduce 
 
 %%
 
@@ -92,6 +93,7 @@ cmds : cmd_1 ';' cmds   { print_prod("cmds -> cmd_1 ; cmds"); $$.c = $1.c + $3.c
 
 cmd_1 : atr           { print_prod("cmd_1 -> atr"); }
   | LET decl          { print_prod("cmd_1 -> LET decl"); $$.c = $2.c; }
+  | loop              { print_prod("cmd_1 -> loop"); }
   ;
 
 cmd_2 : condicional       { print_prod("cmd_2 -> condicional"); }
@@ -108,7 +110,7 @@ atr_id: ID '=' exp            { verifica_variaveis_declaradas($1.v); print_prod(
   ;
 
 // nova regra para adicao do @ no final para pegar o valor do id
-atr_recursiva: ID '=' exp    { print_prod("atr_recursiva -> ID = exp"); $$.c = to_vector($1.v) + $3.c + "= ^" + to_vector($1.v) + "@"; } 
+atr_recursiva: ID '=' exp    { print_prod("atr_recursiva -> ID = exp"); $$.c = to_vector($1.v) + $3.c + "=" + "^" + to_vector($1.v) + "@"; } 
   | ID '=' atr_recursiva      { print_prod("atr_recursiva -> ID = atr_recursiva"); $$.c = to_vector($1.v) + $3.c + "=" + "^"; }
   ;
 
@@ -131,8 +133,19 @@ fim_decl: ',' decl     { print_prod("fim_decl -> , decl"); $$.c = $2.c; }
   |                    { print_prod("fim_decl -> epsilon"); $$.c = epsilon; }
   ;
 
-condicional: IF '(' condicao ')' corpo ELSE corpo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string end_if = gera_label("end_if"); $$.c = $3.c + "!" + else_label + "?" + $5.c + end_if + "#" + (":" + else_label) + $7.c + (":" + end_if); }
-	| IF '(' condicao ')' corpo %prec '#' { print_prod("condicional -> IF (condicao) corpo"); string end_if = gera_label("end_if"); $$.c = $3.c + "!" + end_if + "?" + $5.c + (":" + end_if);}
+loop: while_loop       { print_prod("loop -> while_loop"); }
+  | for_loop           { print_prod("loop -> for_loop"); }
+  ;
+
+while_loop: WHILE '(' condicao ')' corpo { print_prod("while_loop -> WHILE ( condicao ) corpo"); string inicio_while = gera_label("inicio_while"); string fim_while = gera_label("fim_while"); $$.c = (":" + inicio_while) + $3.c + "!" + fim_while + "?" + $5.c + inicio_while + "#" + (":" + fim_while); }
+  ;
+
+for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $4.c + (":" + inicio_for) + $6.c + "!" + fim_for + "?" + $8.c + $10.c + inicio_for + "#" + (":" + fim_for); }
+  | FOR '(' decl ';' condicao ';' atr ')' corpo           { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $3.c + (":" + inicio_for) + $5.c + "!" + fim_for + "?" + $7.c + $9.c + inicio_for + "#" + (":" + fim_for); }
+  ;
+
+condicional: IF '(' condicao ')' corpo ELSE corpo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + else_label + "?" + $5.c + fim_if + "#" + (":" + else_label) + $7.c + (":" + fim_if); }
+	| IF '(' condicao ')' corpo %prec 'T' { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + fim_if + "?" + $5.c + (":" + fim_if);}
 	;
 
 corpo: '{' cmds '}'           { print_prod("corpo -> { cmds }"); $$.c = $2.c; }
@@ -180,7 +193,7 @@ void yyerror(const char* st) {
 }
 
 void print_NPR(vector<string> c) {
-  c = resolve_enderecos(c); 
+  c = resolve_enderecos(c);  
   for (string s : c) { 
     cout << s + " "; 
   } 
@@ -238,6 +251,10 @@ vector<string> operator+(vector<string> a, vector<string> b) {
 vector<string> operator+(vector<string> a, string b) {
   a.push_back(b);
   return a;
+}
+
+vector<string> operator+(string a, vector<string> b) {
+  return epsilon + a + b;
 }
 
 void atualiza_atributos_token(int token) {

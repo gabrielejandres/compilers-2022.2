@@ -1,4 +1,1 @@
-a & a "ABA" = ^ c & c 'CATE' = ^ resultado & 
-a @ c @ == ! 28 ? resultado "Ta' errado!" = ^ 59 # 
-a @ c @ < ! 55 ? resultado "a vem antes de c: " = ^ resultado resultado @ a @ '<' + c @ + + = ^ 59 # 
-resultado "Deu ruim!" = ^ .
+i & i 0 = ^ j & j 0 1 - = ^ x & x 9 = ^ b & b [] = ^ i @ x @ 2 3 * - 2.1 + < ! 67 ? b @ i @ j @ [=] ^ i i @ 1 + = ^ j i @ 2.0 / j @ + = ^ 26 # j x 0 = ^ x @ = ^ .
