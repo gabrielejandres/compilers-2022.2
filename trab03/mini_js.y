@@ -111,7 +111,7 @@ atr_id: ID '=' exp            { verifica_variaveis_declaradas($1.v); print_prod(
 
 // nova regra para adicao do @ no final para pegar o valor do id
 atr_recursiva: ID '=' exp    { print_prod("atr_recursiva -> ID = exp"); $$.c = to_vector($1.v) + $3.c + "=" + "^" + to_vector($1.v) + "@"; } 
-  | ID '=' atr_recursiva      { print_prod("atr_recursiva -> ID = atr_recursiva"); $$.c = to_vector($1.v) + $3.c + "="; }
+  | ID '=' atr_recursiva     { print_prod("atr_recursiva -> ID = atr_recursiva"); $$.c = to_vector($1.v) + $3.c + "="; }
   ;
 
 atr_obj: ID '.' prop '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . prop = exp"); $$.c = to_vector($1.v) + "@" + $3.c + $5.c + "[=]"; }
@@ -127,9 +127,21 @@ atr_array: ID indices '=' rec     { verifica_variaveis_declaradas($1.v); print_p
   ;
 
 rec: exp          { print_prod("rec -> ID indices = exp"); } 
-  | matexp          { print_prod("rec -> matexp"); }
-  | exp '=' rec   { print_prod("rec -> = rec"); $$.c = $1.c + $2.c; }
+  | matexp        { print_prod("rec -> matexp"); }
+  | exp '=' rec   { print_prod("rec -> exp = rec"); $$.c = $1.c + $2.c; }
   | atr_array     { print_prod("rec -> atr_array"); }
+  ;
+
+matexp: matrix          { print_prod("matexp -> matrix"); }
+  | matexp '*' matexp   { print_prod("matexp -> matexp * matexp"); $$.c = $1.c + "[@]" + $3.c + "[@]" + "*"; }
+  | matexp '+' matexp   { print_prod("matexp -> matexp + matexp"); $$.c = $1.c + "[@]" + $3.c + "+"; }
+  ;
+
+matrix: ID indices  { print_prod("matrix -> ID indices"); $$.c = to_vector($1.v) + "@" + $2.c; }
+  ;
+
+indices: '[' exp ']' indices { print_prod("indices -> [ exp ] indices"); $$.c = $2.c + "[@]" + $4.c; }
+  | '[' exp ']'              { print_prod("indices -> [ exp ]"); $$.c = $2.c; }
   ;
 
 decl: ID '=' exp fim_decl { atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + $3.c + "=" + "^" + $4.c; }
@@ -152,11 +164,11 @@ while_loop: WHILE '(' condicao ')' corpo { print_prod("while_loop -> WHILE ( con
   ;
 
 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $4.c + (":" + inicio_for) + $6.c + "!" + fim_for + "?" + $10.c + $8.c + "^" + inicio_for + "#" + (":" + fim_for); }
-  | FOR '(' atr ';' condicao ';' atr ')' corpo           { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $3.c + "^" + (":" + inicio_for) + $5.c + "!" + fim_for + "?" + $9.c + $7.c + "^" + inicio_for + "#" + (":" + fim_for); }
+  | FOR '(' atr ';' condicao ';' atr ')' corpo            { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $3.c + "^" + (":" + inicio_for) + $5.c + "!" + fim_for + "?" + $9.c + $7.c + "^" + inicio_for + "#" + (":" + fim_for); }
   ;
 
 condicional: IF '(' condicao ')' corpo ELSE corpo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + else_label + "?" + $5.c + fim_if + "#" + (":" + else_label) + $7.c + (":" + fim_if); }
-	| IF '(' condicao ')' corpo %prec 'T' { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + fim_if + "?" + $5.c + (":" + fim_if);}
+	| IF '(' condicao ')' corpo %prec 'T'           { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + fim_if + "?" + $5.c + (":" + fim_if);}
 	;
 
 corpo: '{' cmds '}'           { print_prod("corpo -> { cmds }"); $$.c = $2.c; }
@@ -177,18 +189,6 @@ exp: exp '+' exp    { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "+"; 
   | exp '/' exp     { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
   | ID '.' ID       { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
   | val             { print_prod("exp -> val"); }
-  ;
-
-matexp: matrix          { print_prod("matexp -> matrix"); }
-  | matexp '*' matexp { print_prod("matexp -> matexp * matexp"); $$.c = $1.c + "[@]" + $3.c + "[@]" + "*"; }
-  | matexp '+' matexp { print_prod("matexp -> matexp + matexp"); $$.c = $1.c + "[@]" + $3.c + "+"; }
-  ;
-
-matrix: ID indices  { print_prod("matrix -> ID indices"); $$.c = to_vector($1.v) + "@" + $2.c; }
-  ;
-
-indices: '[' exp ']' indices { print_prod("indices -> [ exp ] indices"); $$.c = $2.c + "[@]" + $4.c; }
-  | '[' exp ']'              { print_prod("indices -> [ exp ]"); $$.c = $2.c; }
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
