@@ -37,6 +37,12 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 "let"	   { atualiza_atributos_token(LET);
              return LET; }
 
+"var"     { atualiza_atributos_token(VAR);
+             return VAR; }
+
+"const"   { atualiza_atributos_token(CONST);
+             return CONST; }
+
 "if"    { atualiza_atributos_token(IF);
             return IF; }
 
@@ -51,6 +57,10 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 
 "function"    { atualiza_atributos_token(FUNCTION);
                 return FUNCTION; }
+
+
+"return"    { atualiza_atributos_token(RETURN);
+                return RETURN; }
 
 "asm{".*"}"  {  yylval.c = tokeniza(yytext + 3);
                 return ASM; }

@@ -5,13 +5,21 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <sstream>
 
 using namespace std;
+
+enum TipoVar { TIPO_LET, TIPO_VAR, TIPO_CONST };
 
 struct Atributos {
   vector<string> c;
   string v;
   int n_args = 0;
+};
+
+struct Simbolo {
+  int linha, coluna;
+  TipoVar tipo;
 };
 
 // Tipo dos atributos: YYSTYPE eh o tipo usado para os atributos
@@ -52,12 +60,15 @@ string trim(string s, string chars);
 vector<string> tokeniza(string s);
 vector<string> gera_funcao(string id, string label);
 vector<string> gera_fim_funcao();
+vector<string> gera_retorno();
 
 // Variaveis
 map<string, int> variaveis_declaradas;
 vector<string> epsilon;
 vector<string> funcoes;
-int n_params = 0;
+int n_params;
+vector<bool> pode_retornar = { false };
+vector<map<string, Simbolo>> ts = {};
 
 %}
 
@@ -67,6 +78,8 @@ int n_params = 0;
 %token NUM
 %token ID 
 %token LET
+%token VAR
+%token CONST
 %token OBJ
 %token ARRAY
 %token STRING
@@ -80,6 +93,7 @@ int n_params = 0;
 %token FOR
 %token FUNCTION
 %token ASM
+%token RETURN
 
 // Start indica o simbolo inicial da gramatica
 %start s
@@ -108,22 +122,38 @@ cmds : cmd_1 separador cmds   { print_prod("cmds -> cmd_1 ; cmds"); $$.c = $1.c 
 
 cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
   | LET decl          { print_prod("cmd_1 -> LET decl"); $$.c = $2.c; }
+  | VAR decl          { print_prod("cmd_1 -> VAR decl"); $$.c = $2.c; }
+  | CONST decl        { print_prod("cmd_1 -> CONST decl"); $$.c = $2.c; }
   | loop              { print_prod("cmd_1 -> loop"); }
   | exp ASM           { print_prod("cmd_1 -> exp ASM"); $$.c = $1.c + $2.c + "^"; }
+  | RETURN            { print_prod("cmd_1 -> RETURN"); 
+                        if(!pode_retornar.back()) {
+                            yyerror("Comando RETURN fora de funcao");
+                        }
+                        $$.c = gera_retorno(); 
+                      } 
+  | RETURN exp        { print_prod("cmd_1 -> RETURN exp"); 
+                        if(!pode_retornar.back()) {
+                            yyerror("Comando RETURN fora de funcao");
+                        }
+                        $$.c = $2.c + gera_retorno(); 
+                      } 
   ;
 
 cmd_2 : condicional       { print_prod("cmd_2 -> condicional"); }
   | funcao                { print_prod("cmd_2 -> funcao"); }
   ;
 
-funcao: FUNCTION ID '(' args ')' corpo  { print_prod("funcao -> FUNCTION ID ( args ) corpo"); 
+funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo  desempilha_escopo_func { 
+                                          print_prod("funcao -> FUNCTION ID ( args ) corpo"); 
                                           string fim_func = gera_label($2.v); 
-                                          funcoes = funcoes + (":" + fim_func) + $4.c + $6.c + gera_fim_funcao();
+                                          funcoes = funcoes + (":" + fim_func) + $5.c + $7.c + gera_fim_funcao();
                                           $$.c = gera_funcao($2.v, fim_func);
                                         }
-  | FUNCTION ID '(' ')' corpo           { print_prod("funcao -> FUNCTION ID ( ) corpo"); 
+  | FUNCTION ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func {
+                                          print_prod("funcao -> FUNCTION ID ( ) corpo"); 
                                           string fim_func = gera_label($2.v); 
-                                          funcoes = funcoes + (":" + fim_func) + $5.c + gera_fim_funcao();
+                                          funcoes = funcoes + (":" + fim_func) + $6.c + gera_fim_funcao();
                                           $$.c = gera_funcao($2.v, fim_func);
                                         }
   ;
@@ -155,6 +185,18 @@ arg: ID { print_prod("arg -> ID");
             $$.c = $1.c;
             $$.n_args = 1;
           }
+  ;
+
+empilha_escopo_func: empilha_escopo { print_prod("empilha_escopo_func -> empilha_escopo"); pode_retornar.push_back(true); }
+  ;
+
+desempilha_escopo_func: desempilha_escopo { print_prod("desempilha_escopo_func -> desempilha_escopo"); pode_retornar.pop_back(); }
+  ;
+
+empilha_escopo: { print_prod("empilha_escopo -> "); ts.push_back(map<string, Simbolo>{}); }
+  ;
+
+desempilha_escopo: { print_prod("desempilha_escopo -> "); ts.pop_back(); }
   ;
 
 atr: atr_id         { print_prod("atr -> atr_id"); }
@@ -241,18 +283,18 @@ condicao: exp '>' exp   { print_prod("condicao -> exp > exp"); $$.c = $1.c + $3.
   | exp                 { print_prod("condicao -> exp"); $$.c = $1.c; }
   ;
 
-exp: exp '+' exp    { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "+"; }
-  | exp '-' exp     { print_prod("exp -> exp - exp"); $$.c = $1.c + $3.c + "-"; }
-  | exp '*' exp     { print_prod("exp -> exp * exp"); $$.c = $1.c + $3.c + "*"; }
-  | exp '/' exp     { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
-  | ID '.' ID       { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
-  | val             { print_prod("exp -> val"); }
-  | exp '(' params ')'  { print_prod("exp -> exp ( params )"); n_params = 0; $$.c = $3.c + $1.v + "@" + "$"; }
+exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "+"; }
+  | exp '-' exp         { print_prod("exp -> exp - exp"); $$.c = $1.c + $3.c + "-"; }
+  | exp '*' exp         { print_prod("exp -> exp * exp"); $$.c = $1.c + $3.c + "*"; }
+  | exp '/' exp         { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
+  | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
+  | val                 { print_prod("exp -> val"); }
+  | exp '(' params ')'  { print_prod("exp -> exp ( params )"); $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$"; n_params = 0;}
   ;
 
-params: exp ',' params { print_prod("params -> exp , params"); n_params++; $$.c = $1.c + $3.c; }
-  | exp                { print_prod("params -> exp"); n_params++; $$.c = $1.c + to_string(n_params); }
-  |                    { print_prod("params -> epsilon"); $$.c = epsilon + to_string(n_params); }
+params: exp ',' params { print_prod("params -> exp , params"); $$.c = $1.c + $3.c; n_params++; }
+  | exp                { print_prod("params -> exp"); $$.c = $1.c; n_params++; }
+  |                    { print_prod("params -> epsilon"); $$.c = epsilon; }
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
@@ -288,6 +330,10 @@ void print_NPR(vector<string> c) {
 
 void print_prod(const char *s) {
   cout << s << endl;
+}
+
+vector<string> gera_retorno() {
+  return to_vector("'&retorno'") + "@" + "~";
 }
 
 vector<string> gera_fim_funcao() {
