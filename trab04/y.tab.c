@@ -130,18 +130,20 @@ vector<string> tokeniza(string s);
 vector<string> gera_funcao(string id, string label);
 vector<string> gera_fim_funcao();
 vector<string> gera_retorno();
-string int_to_string(int n);
+void atualiza_variaveis_declaradas_funcao(string var);
 
 // Variaveis
 map<string, int> variaveis_declaradas;
+map<string, int> variaveis_declaradas_funcao;
 vector<string> epsilon;
 vector<string> funcoes;
 int n_params;
 vector<bool> pode_retornar = { false };
+bool eh_funcao = false;
 vector<map<string, Simbolo>> ts = {};
 
 
-#line 145 "y.tab.c"
+#line 147 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -621,15 +623,15 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   116,   116,   119,   120,   121,   124,   125,   126,   127,
-     128,   129,   130,   136,   144,   145,   148,   154,   162,   167,
-     174,   179,   184,   191,   194,   197,   200,   203,   204,   205,
-     208,   209,   210,   214,   215,   218,   219,   222,   223,   226,
-     227,   230,   231,   232,   233,   236,   237,   238,   241,   244,
-     245,   248,   249,   252,   253,   256,   257,   260,   261,   264,
-     267,   268,   271,   272,   275,   276,   277,   280,   281,   282,
-     283,   284,   287,   288,   289,   290,   291,   292,   293,   296,
-     297,   298,   301,   302,   303,   304,   305,   306,   307,   308
+       0,   118,   118,   121,   122,   123,   126,   127,   128,   129,
+     130,   131,   132,   138,   146,   147,   150,   156,   164,   170,
+     178,   183,   188,   195,   198,   201,   204,   207,   208,   209,
+     212,   213,   214,   218,   219,   222,   223,   226,   227,   230,
+     231,   234,   235,   236,   237,   240,   241,   242,   245,   248,
+     249,   252,   253,   256,   257,   260,   261,   264,   265,   268,
+     271,   272,   275,   276,   279,   280,   281,   284,   285,   286,
+     287,   288,   291,   292,   293,   294,   295,   296,   297,   300,
+     301,   302,   305,   306,   307,   308,   309,   310,   311,   312
 };
 #endif
 
@@ -1661,575 +1663,577 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 116 "mini_js.y"
+#line 118 "mini_js.y"
          { print_prod("s -> cmds"); yyvsp[0].c = yyvsp[0].c + "." + funcoes; print_NPR(yyvsp[0].c); }
-#line 1667 "y.tab.c"
+#line 1669 "y.tab.c"
     break;
 
   case 3:
-#line 119 "mini_js.y"
+#line 121 "mini_js.y"
                               { print_prod("cmds -> cmd_1 ; cmds"); yyval.c = yyvsp[-2].c + yyvsp[0].c; }
-#line 1673 "y.tab.c"
+#line 1675 "y.tab.c"
     break;
 
   case 4:
-#line 120 "mini_js.y"
+#line 122 "mini_js.y"
                               { print_prod("cmds -> cmd_2 cmds"); yyval.c = yyvsp[-1].c + yyvsp[0].c; }
-#line 1679 "y.tab.c"
+#line 1681 "y.tab.c"
     break;
 
   case 5:
-#line 121 "mini_js.y"
+#line 123 "mini_js.y"
                               { print_prod("cmds -> epsilon"); yyval.c = epsilon; }
-#line 1685 "y.tab.c"
+#line 1687 "y.tab.c"
     break;
 
   case 6:
-#line 124 "mini_js.y"
+#line 126 "mini_js.y"
                       { print_prod("cmd_1 -> atr"); yyval.c = yyvsp[0].c + "^"; }
-#line 1691 "y.tab.c"
+#line 1693 "y.tab.c"
     break;
 
   case 7:
-#line 125 "mini_js.y"
+#line 127 "mini_js.y"
                       { print_prod("cmd_1 -> LET decl"); yyval.c = yyvsp[0].c; }
-#line 1697 "y.tab.c"
+#line 1699 "y.tab.c"
     break;
 
   case 8:
-#line 126 "mini_js.y"
+#line 128 "mini_js.y"
                       { print_prod("cmd_1 -> VAR decl"); yyval.c = yyvsp[0].c; }
-#line 1703 "y.tab.c"
+#line 1705 "y.tab.c"
     break;
 
   case 9:
-#line 127 "mini_js.y"
+#line 129 "mini_js.y"
                       { print_prod("cmd_1 -> CONST decl"); yyval.c = yyvsp[0].c; }
-#line 1709 "y.tab.c"
+#line 1711 "y.tab.c"
     break;
 
   case 10:
-#line 128 "mini_js.y"
+#line 130 "mini_js.y"
                       { print_prod("cmd_1 -> loop"); }
-#line 1715 "y.tab.c"
+#line 1717 "y.tab.c"
     break;
 
   case 11:
-#line 129 "mini_js.y"
+#line 131 "mini_js.y"
                       { print_prod("cmd_1 -> exp ASM"); yyval.c = yyvsp[-1].c + yyvsp[0].c + "^"; }
-#line 1721 "y.tab.c"
+#line 1723 "y.tab.c"
     break;
 
   case 12:
-#line 130 "mini_js.y"
+#line 132 "mini_js.y"
                       { print_prod("cmd_1 -> RETURN"); 
                         if(!pode_retornar.back()) {
                             yyerror("Comando RETURN fora de funcao");
                         }
                         yyval.c = gera_retorno(); 
                       }
-#line 1732 "y.tab.c"
+#line 1734 "y.tab.c"
     break;
 
   case 13:
-#line 136 "mini_js.y"
+#line 138 "mini_js.y"
                       { print_prod("cmd_1 -> RETURN exp"); 
                         if(!pode_retornar.back()) {
                             yyerror("Comando RETURN fora de funcao");
                         }
                         yyval.c = yyvsp[0].c + gera_retorno(); 
                       }
-#line 1743 "y.tab.c"
+#line 1745 "y.tab.c"
     break;
 
   case 14:
-#line 144 "mini_js.y"
+#line 146 "mini_js.y"
                           { print_prod("cmd_2 -> condicional"); }
-#line 1749 "y.tab.c"
+#line 1751 "y.tab.c"
     break;
 
   case 15:
-#line 145 "mini_js.y"
+#line 147 "mini_js.y"
                           { print_prod("cmd_2 -> funcao"); }
-#line 1755 "y.tab.c"
+#line 1757 "y.tab.c"
     break;
 
   case 16:
-#line 148 "mini_js.y"
+#line 150 "mini_js.y"
                                                                                    { 
                                           print_prod("funcao -> FUNCTION ID ( args ) corpo"); 
                                           string fim_func = gera_label(yyvsp[-6].v); 
                                           funcoes = funcoes + (":" + fim_func) + yyvsp[-3].c + yyvsp[-1].c + gera_fim_funcao();
                                           yyval.c = gera_funcao(yyvsp[-6].v, fim_func);
                                         }
-#line 1766 "y.tab.c"
+#line 1768 "y.tab.c"
     break;
 
   case 17:
-#line 154 "mini_js.y"
+#line 156 "mini_js.y"
                                                                          {
                                           print_prod("funcao -> FUNCTION ID ( ) corpo"); 
                                           string fim_func = gera_label(yyvsp[-5].v); 
                                           funcoes = funcoes + (":" + fim_func) + yyvsp[-1].c + gera_fim_funcao();
                                           yyval.c = gera_funcao(yyvsp[-5].v, fim_func);
                                         }
-#line 1777 "y.tab.c"
+#line 1779 "y.tab.c"
     break;
 
   case 18:
-#line 162 "mini_js.y"
+#line 164 "mini_js.y"
                    { print_prod("args -> args , arg"); 
+                      atualiza_variaveis_declaradas_funcao(yyvsp[0].v);
                       yyval.v = "";
                       yyval.n_args = yyvsp[-2].n_args + 1; 
                       yyval.c = yyvsp[-2].c + gera_inicializacao_de_argumento(yyvsp[0].v, yyval.n_args);
                   }
-#line 1787 "y.tab.c"
+#line 1790 "y.tab.c"
     break;
 
   case 19:
-#line 167 "mini_js.y"
+#line 170 "mini_js.y"
                    { print_prod("args -> arg"); 
+                     atualiza_variaveis_declaradas_funcao(yyvsp[0].v);
                      yyval.v = "";
                      yyval.n_args = 1;
                      yyval.c = gera_inicializacao_de_argumento(yyvsp[0].v, yyval.n_args);
                    }
-#line 1797 "y.tab.c"
+#line 1801 "y.tab.c"
     break;
 
   case 20:
-#line 174 "mini_js.y"
+#line 178 "mini_js.y"
         { print_prod("arg -> ID");
           yyval.v = yyvsp[0].v;
           yyval.c = yyvsp[0].c;
           yyval.n_args = 1;
         }
-#line 1807 "y.tab.c"
+#line 1811 "y.tab.c"
     break;
 
   case 21:
-#line 179 "mini_js.y"
+#line 183 "mini_js.y"
                  { print_prod("arg -> ID = exp");
                  yyval.v = yyvsp[-2].v;
                  yyval.c = yyvsp[-2].c + yyvsp[0].c + gera_inicializacao_de_argumento(yyvsp[-2].v, yyval.n_args);
                  yyval.n_args = 1;
                }
-#line 1817 "y.tab.c"
+#line 1821 "y.tab.c"
     break;
 
   case 22:
-#line 184 "mini_js.y"
+#line 188 "mini_js.y"
           { print_prod("arg -> exp");
             yyval.v = yyvsp[0].v;
             yyval.c = yyvsp[0].c;
             yyval.n_args = 1;
           }
-#line 1827 "y.tab.c"
+#line 1831 "y.tab.c"
     break;
 
   case 23:
-#line 191 "mini_js.y"
-                                    { print_prod("empilha_escopo_func -> empilha_escopo"); pode_retornar.push_back(true); }
-#line 1833 "y.tab.c"
+#line 195 "mini_js.y"
+                                    { print_prod("empilha_escopo_func -> empilha_escopo"); pode_retornar.push_back(true); eh_funcao = true; }
+#line 1837 "y.tab.c"
     break;
 
   case 24:
-#line 194 "mini_js.y"
-                                          { print_prod("desempilha_escopo_func -> desempilha_escopo"); pode_retornar.pop_back(); }
-#line 1839 "y.tab.c"
+#line 198 "mini_js.y"
+                                          { print_prod("desempilha_escopo_func -> desempilha_escopo"); pode_retornar.pop_back(); eh_funcao = false; }
+#line 1843 "y.tab.c"
     break;
 
   case 25:
-#line 197 "mini_js.y"
+#line 201 "mini_js.y"
                 { print_prod("empilha_escopo -> "); ts.push_back(map<string, Simbolo>{}); }
-#line 1845 "y.tab.c"
+#line 1849 "y.tab.c"
     break;
 
   case 26:
-#line 200 "mini_js.y"
+#line 204 "mini_js.y"
                    { print_prod("desempilha_escopo -> "); ts.pop_back(); }
-#line 1851 "y.tab.c"
+#line 1855 "y.tab.c"
     break;
 
   case 27:
-#line 203 "mini_js.y"
+#line 207 "mini_js.y"
                     { print_prod("atr -> atr_id"); }
-#line 1857 "y.tab.c"
+#line 1861 "y.tab.c"
     break;
 
   case 28:
-#line 204 "mini_js.y"
+#line 208 "mini_js.y"
                     { print_prod("atr -> atr_obj"); }
-#line 1863 "y.tab.c"
+#line 1867 "y.tab.c"
     break;
 
   case 29:
-#line 205 "mini_js.y"
+#line 209 "mini_js.y"
                     { print_prod("atr -> atr_array"); }
-#line 1869 "y.tab.c"
+#line 1873 "y.tab.c"
     break;
 
   case 30:
-#line 208 "mini_js.y"
+#line 212 "mini_js.y"
                               { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID = exp"); yyval.c = to_vector(yyvsp[-2].v) + yyvsp[0].c + "="; }
-#line 1875 "y.tab.c"
+#line 1879 "y.tab.c"
     break;
 
   case 31:
-#line 209 "mini_js.y"
+#line 213 "mini_js.y"
                               { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID = atr_recursiva"); yyval.c = to_vector(yyvsp[-2].v) + yyvsp[0].c + "="; }
-#line 1881 "y.tab.c"
+#line 1885 "y.tab.c"
     break;
 
   case 32:
-#line 210 "mini_js.y"
+#line 214 "mini_js.y"
                               { verifica_variaveis_declaradas(yyvsp[-2].v); print_prod("atr_id -> ID ADD exp_id"); yyval.c = to_vector(yyvsp[-2].v) + to_vector(yyvsp[-2].v) + "@" + yyvsp[0].c + "+" + "="; }
-#line 1887 "y.tab.c"
+#line 1891 "y.tab.c"
     break;
 
   case 33:
-#line 214 "mini_js.y"
+#line 218 "mini_js.y"
                              { print_prod("atr_recursiva -> ID = exp"); yyval.c = to_vector(yyvsp[-2].v) + yyvsp[0].c + "=" + "^" + to_vector(yyvsp[-2].v) + "@"; }
-#line 1893 "y.tab.c"
+#line 1897 "y.tab.c"
     break;
 
   case 34:
-#line 215 "mini_js.y"
+#line 219 "mini_js.y"
                              { print_prod("atr_recursiva -> ID = atr_recursiva"); yyval.c = to_vector(yyvsp[-2].v) + yyvsp[0].c + "="; }
-#line 1899 "y.tab.c"
+#line 1903 "y.tab.c"
     break;
 
   case 35:
-#line 218 "mini_js.y"
+#line 222 "mini_js.y"
                                  { verifica_variaveis_declaradas(yyvsp[-4].v); print_prod("atr_obj -> ID . prop = exp"); yyval.c = to_vector(yyvsp[-4].v) + "@" + yyvsp[-2].c + yyvsp[0].c + "[=]"; }
-#line 1905 "y.tab.c"
+#line 1909 "y.tab.c"
     break;
 
   case 36:
-#line 219 "mini_js.y"
+#line 223 "mini_js.y"
                                  { verifica_variaveis_declaradas(yyvsp[-4].v); print_prod("atr_obj -> ID . prop ADD exp"); yyval.c = to_vector(yyvsp[-4].v) + "@" + yyvsp[-2].c + to_vector(yyvsp[-4].v) + "@" + yyvsp[-2].c + "[@]" + yyvsp[0].c + "+" + "[=]"; }
-#line 1911 "y.tab.c"
+#line 1915 "y.tab.c"
     break;
 
   case 37:
-#line 222 "mini_js.y"
+#line 226 "mini_js.y"
                     { print_prod("prop -> ID"); }
-#line 1917 "y.tab.c"
+#line 1921 "y.tab.c"
     break;
 
   case 38:
-#line 223 "mini_js.y"
+#line 227 "mini_js.y"
                     { print_prod("prop -> ID [ exp ]"); yyval.c = to_vector(yyvsp[-3].v) + "[@]" + yyvsp[-1].c; }
-#line 1923 "y.tab.c"
+#line 1927 "y.tab.c"
     break;
 
   case 39:
-#line 226 "mini_js.y"
+#line 230 "mini_js.y"
                                   { verifica_variaveis_declaradas(yyvsp[-3].v); print_prod("atr_array -> ID indices = exp"); yyval.c = to_vector(yyvsp[-3].v) + "@" + yyvsp[-2].c + yyvsp[0].c + "[=]"; }
-#line 1929 "y.tab.c"
+#line 1933 "y.tab.c"
     break;
 
   case 40:
-#line 227 "mini_js.y"
+#line 231 "mini_js.y"
                                   { verifica_variaveis_declaradas(yyvsp[-5].v); print_prod("atr_array -> ID [ atr ] = exp"); yyval.c = to_vector(yyvsp[-5].v) + "@" + yyvsp[-3].c + yyvsp[0].c + "[=]"; }
-#line 1935 "y.tab.c"
+#line 1939 "y.tab.c"
     break;
 
   case 41:
-#line 230 "mini_js.y"
+#line 234 "mini_js.y"
                   { print_prod("rec -> ID indices = exp"); }
-#line 1941 "y.tab.c"
+#line 1945 "y.tab.c"
     break;
 
   case 42:
-#line 231 "mini_js.y"
+#line 235 "mini_js.y"
                   { print_prod("rec -> matexp"); }
-#line 1947 "y.tab.c"
+#line 1951 "y.tab.c"
     break;
 
   case 43:
-#line 232 "mini_js.y"
+#line 236 "mini_js.y"
                   { print_prod("rec -> exp = rec"); yyval.c = yyvsp[-2].c + yyvsp[-1].c; }
-#line 1953 "y.tab.c"
+#line 1957 "y.tab.c"
     break;
 
   case 44:
-#line 233 "mini_js.y"
+#line 237 "mini_js.y"
                   { print_prod("rec -> atr_array"); }
-#line 1959 "y.tab.c"
+#line 1963 "y.tab.c"
     break;
 
   case 45:
-#line 236 "mini_js.y"
+#line 240 "mini_js.y"
                         { print_prod("matexp -> matrix"); }
-#line 1965 "y.tab.c"
+#line 1969 "y.tab.c"
     break;
 
   case 46:
-#line 237 "mini_js.y"
+#line 241 "mini_js.y"
                         { print_prod("matexp -> matexp * matexp"); yyval.c = yyvsp[-2].c + "[@]" + yyvsp[0].c + "[@]" + "*"; }
-#line 1971 "y.tab.c"
+#line 1975 "y.tab.c"
     break;
 
   case 47:
-#line 238 "mini_js.y"
+#line 242 "mini_js.y"
                         { print_prod("matexp -> matexp + matexp"); yyval.c = yyvsp[-2].c + "[@]" + yyvsp[0].c + "+"; }
-#line 1977 "y.tab.c"
+#line 1981 "y.tab.c"
     break;
 
   case 48:
-#line 241 "mini_js.y"
+#line 245 "mini_js.y"
                     { print_prod("matrix -> ID indices"); yyval.c = to_vector(yyvsp[-1].v) + "@" + yyvsp[0].c; }
-#line 1983 "y.tab.c"
+#line 1987 "y.tab.c"
     break;
 
   case 49:
-#line 244 "mini_js.y"
+#line 248 "mini_js.y"
                              { print_prod("indices -> [ exp ] indices"); yyval.c = yyvsp[-2].c + "[@]" + yyvsp[0].c; }
-#line 1989 "y.tab.c"
+#line 1993 "y.tab.c"
     break;
 
   case 50:
-#line 245 "mini_js.y"
+#line 249 "mini_js.y"
                              { print_prod("indices -> [ exp ]"); yyval.c = yyvsp[-1].c; }
-#line 1995 "y.tab.c"
+#line 1999 "y.tab.c"
     break;
 
   case 51:
-#line 248 "mini_js.y"
-                          { atualiza_variaveis_declaradas(yyvsp[-3].v); print_prod("decl -> ID = exp fim_decl"); yyval.c = to_vector(yyvsp[-3].v) + "&" + to_vector(yyvsp[-3].v) + yyvsp[-1].c + "=" + "^" + yyvsp[0].c; }
-#line 2001 "y.tab.c"
+#line 252 "mini_js.y"
+                          { if(eh_funcao) atualiza_variaveis_declaradas_funcao(yyvsp[-3].v); else atualiza_variaveis_declaradas(yyvsp[-3].v); print_prod("decl -> ID = exp fim_decl"); yyval.c = to_vector(yyvsp[-3].v) + "&" + to_vector(yyvsp[-3].v) + yyvsp[-1].c + "=" + "^" + yyvsp[0].c; }
+#line 2005 "y.tab.c"
     break;
 
   case 52:
-#line 249 "mini_js.y"
-                          { atualiza_variaveis_declaradas(yyvsp[-1].v); print_prod("decl -> ID fim_decl"); yyval.c = to_vector(yyvsp[-1].v) + "&" + yyvsp[0].c; }
-#line 2007 "y.tab.c"
+#line 253 "mini_js.y"
+                          { if(eh_funcao) atualiza_variaveis_declaradas_funcao(yyvsp[-1].v); else atualiza_variaveis_declaradas(yyvsp[-1].v);  print_prod("decl -> ID fim_decl"); yyval.c = to_vector(yyvsp[-1].v) + "&" + yyvsp[0].c; }
+#line 2011 "y.tab.c"
     break;
 
   case 53:
-#line 252 "mini_js.y"
+#line 256 "mini_js.y"
                        { print_prod("fim_decl -> , decl"); yyval.c = yyvsp[0].c; }
-#line 2013 "y.tab.c"
+#line 2017 "y.tab.c"
     break;
 
   case 54:
-#line 253 "mini_js.y"
+#line 257 "mini_js.y"
                        { print_prod("fim_decl -> epsilon"); yyval.c = epsilon; }
-#line 2019 "y.tab.c"
+#line 2023 "y.tab.c"
     break;
 
   case 55:
-#line 256 "mini_js.y"
+#line 260 "mini_js.y"
                         { print_prod("loop -> while_loop"); }
-#line 2025 "y.tab.c"
+#line 2029 "y.tab.c"
     break;
 
   case 56:
-#line 257 "mini_js.y"
+#line 261 "mini_js.y"
                         { print_prod("loop -> for_loop"); }
-#line 2031 "y.tab.c"
+#line 2035 "y.tab.c"
     break;
 
   case 57:
-#line 260 "mini_js.y"
+#line 264 "mini_js.y"
                                 { print_prod("separador -> separador ;"); }
-#line 2037 "y.tab.c"
+#line 2041 "y.tab.c"
     break;
 
   case 58:
-#line 261 "mini_js.y"
+#line 265 "mini_js.y"
                                 { print_prod("separador -> epsilon"); yyval.c = epsilon; }
-#line 2043 "y.tab.c"
+#line 2047 "y.tab.c"
     break;
 
   case 59:
-#line 264 "mini_js.y"
+#line 268 "mini_js.y"
                                          { print_prod("while_loop -> WHILE ( condicao ) corpo"); string inicio_while = gera_label("inicio_while"); string fim_while = gera_label("fim_while"); yyval.c = (":" + inicio_while) + yyvsp[-2].c + "!" + fim_while + "?" + yyvsp[0].c + inicio_while + "#" + (":" + fim_while); }
-#line 2049 "y.tab.c"
+#line 2053 "y.tab.c"
     break;
 
   case 60:
-#line 267 "mini_js.y"
+#line 271 "mini_js.y"
                                                           { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); yyval.c = yyvsp[-6].c + (":" + inicio_for) + yyvsp[-4].c + "!" + fim_for + "?" + yyvsp[0].c + yyvsp[-2].c + "^" + inicio_for + "#" + (":" + fim_for); }
-#line 2055 "y.tab.c"
+#line 2059 "y.tab.c"
     break;
 
   case 61:
-#line 268 "mini_js.y"
+#line 272 "mini_js.y"
                                                           { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); yyval.c = yyvsp[-6].c + "^" + (":" + inicio_for) + yyvsp[-4].c + "!" + fim_for + "?" + yyvsp[0].c + yyvsp[-2].c + "^" + inicio_for + "#" + (":" + fim_for); }
-#line 2061 "y.tab.c"
+#line 2065 "y.tab.c"
     break;
 
   case 62:
-#line 271 "mini_js.y"
+#line 275 "mini_js.y"
                                                   { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string fim_if = gera_label("fim_if"); yyval.c = yyvsp[-4].c + "!" + else_label + "?" + yyvsp[-2].c + fim_if + "#" + (":" + else_label) + yyvsp[0].c + (":" + fim_if); }
-#line 2067 "y.tab.c"
+#line 2071 "y.tab.c"
     break;
 
   case 63:
-#line 272 "mini_js.y"
+#line 276 "mini_js.y"
                                                         { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); yyval.c = yyvsp[-2].c + "!" + fim_if + "?" + yyvsp[0].c + (":" + fim_if);}
-#line 2073 "y.tab.c"
+#line 2077 "y.tab.c"
     break;
 
   case 64:
-#line 275 "mini_js.y"
+#line 279 "mini_js.y"
                               { print_prod("corpo -> { cmds }"); yyval.c = yyvsp[-1].c; }
-#line 2079 "y.tab.c"
+#line 2083 "y.tab.c"
     break;
 
   case 65:
-#line 276 "mini_js.y"
+#line 280 "mini_js.y"
                               { print_prod("corpo -> cmd_1 ;"); }
-#line 2085 "y.tab.c"
+#line 2089 "y.tab.c"
     break;
 
   case 66:
-#line 277 "mini_js.y"
+#line 281 "mini_js.y"
                               { print_prod("corpo -> cmd_2"); }
-#line 2091 "y.tab.c"
+#line 2095 "y.tab.c"
     break;
 
   case 67:
-#line 280 "mini_js.y"
+#line 284 "mini_js.y"
                         { print_prod("condicao -> exp > exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + ">"; }
-#line 2097 "y.tab.c"
+#line 2101 "y.tab.c"
     break;
 
   case 68:
-#line 281 "mini_js.y"
+#line 285 "mini_js.y"
                         { print_prod("condicao -> exp < exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "<"; }
-#line 2103 "y.tab.c"
+#line 2107 "y.tab.c"
     break;
 
   case 69:
-#line 282 "mini_js.y"
+#line 286 "mini_js.y"
                         { print_prod("condicao -> exp IGUAL exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "=="; }
-#line 2109 "y.tab.c"
+#line 2113 "y.tab.c"
     break;
 
   case 70:
-#line 283 "mini_js.y"
+#line 287 "mini_js.y"
                         { print_prod("condicao -> exp DIF exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "!="; }
-#line 2115 "y.tab.c"
+#line 2119 "y.tab.c"
     break;
 
   case 71:
-#line 284 "mini_js.y"
+#line 288 "mini_js.y"
                         { print_prod("condicao -> exp"); yyval.c = yyvsp[0].c; }
-#line 2121 "y.tab.c"
+#line 2125 "y.tab.c"
     break;
 
   case 72:
-#line 287 "mini_js.y"
+#line 291 "mini_js.y"
                         { print_prod("exp -> exp + exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "+"; }
-#line 2127 "y.tab.c"
+#line 2131 "y.tab.c"
     break;
 
   case 73:
-#line 288 "mini_js.y"
+#line 292 "mini_js.y"
                         { print_prod("exp -> exp - exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "-"; }
-#line 2133 "y.tab.c"
+#line 2137 "y.tab.c"
     break;
 
   case 74:
-#line 289 "mini_js.y"
+#line 293 "mini_js.y"
                         { print_prod("exp -> exp * exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "*"; }
-#line 2139 "y.tab.c"
+#line 2143 "y.tab.c"
     break;
 
   case 75:
-#line 290 "mini_js.y"
+#line 294 "mini_js.y"
                         { print_prod("exp -> exp / exp"); yyval.c = yyvsp[-2].c + yyvsp[0].c + "/"; }
-#line 2145 "y.tab.c"
+#line 2149 "y.tab.c"
     break;
 
   case 76:
-#line 291 "mini_js.y"
+#line 295 "mini_js.y"
                         { print_prod("exp -> ID . ID"); yyval.c = to_vector(yyvsp[-2].v) + "@" + yyvsp[0].v + "[@]"; }
-#line 2151 "y.tab.c"
+#line 2155 "y.tab.c"
     break;
 
   case 77:
-#line 292 "mini_js.y"
+#line 296 "mini_js.y"
                         { print_prod("exp -> val"); }
-#line 2157 "y.tab.c"
+#line 2161 "y.tab.c"
     break;
 
   case 78:
-#line 293 "mini_js.y"
-                        { print_prod("exp -> exp ( params )"); yyval.c = yyvsp[-1].c + int_to_string(n_params) + yyvsp[-3].v + "@" + "$"; n_params = 0;}
-#line 2163 "y.tab.c"
+#line 297 "mini_js.y"
+                        { print_prod("exp -> exp ( params )"); yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].v + "@" + "$"; n_params = 0;}
+#line 2167 "y.tab.c"
     break;
 
   case 79:
-#line 296 "mini_js.y"
+#line 300 "mini_js.y"
                        { print_prod("params -> exp , params"); yyval.c = yyvsp[-2].c + yyvsp[0].c; n_params++; }
-#line 2169 "y.tab.c"
+#line 2173 "y.tab.c"
     break;
 
   case 80:
-#line 297 "mini_js.y"
+#line 301 "mini_js.y"
                        { print_prod("params -> exp"); yyval.c = yyvsp[0].c; n_params++; }
-#line 2175 "y.tab.c"
+#line 2179 "y.tab.c"
     break;
 
   case 81:
-#line 298 "mini_js.y"
+#line 302 "mini_js.y"
                        { print_prod("params -> epsilon"); yyval.c = epsilon; }
-#line 2181 "y.tab.c"
+#line 2185 "y.tab.c"
     break;
 
   case 82:
-#line 301 "mini_js.y"
+#line 305 "mini_js.y"
                   { print_prod("val -> ID"); yyval.c = to_vector(yyvsp[0].v) + "@"; }
-#line 2187 "y.tab.c"
+#line 2191 "y.tab.c"
     break;
 
   case 83:
-#line 302 "mini_js.y"
+#line 306 "mini_js.y"
                   { print_prod("val -> NUM"); }
-#line 2193 "y.tab.c"
+#line 2197 "y.tab.c"
     break;
 
   case 84:
-#line 303 "mini_js.y"
+#line 307 "mini_js.y"
                   { print_prod("val -> - NUM"); yyval.c = to_vector("0") + yyvsp[0].c + "-" ; }
-#line 2199 "y.tab.c"
+#line 2203 "y.tab.c"
     break;
 
   case 85:
-#line 304 "mini_js.y"
+#line 308 "mini_js.y"
                   { print_prod("val -> ( exp )"); yyval = yyvsp[-1]; }
-#line 2205 "y.tab.c"
+#line 2209 "y.tab.c"
     break;
 
   case 86:
-#line 305 "mini_js.y"
+#line 309 "mini_js.y"
                   { print_prod("val -> OBJ"); }
-#line 2211 "y.tab.c"
+#line 2215 "y.tab.c"
     break;
 
   case 87:
-#line 306 "mini_js.y"
+#line 310 "mini_js.y"
                   { print_prod("val -> ARRAY"); }
-#line 2217 "y.tab.c"
+#line 2221 "y.tab.c"
     break;
 
   case 88:
-#line 307 "mini_js.y"
+#line 311 "mini_js.y"
                   { print_prod("val -> STRING"); }
-#line 2223 "y.tab.c"
+#line 2227 "y.tab.c"
     break;
 
   case 89:
-#line 308 "mini_js.y"
+#line 312 "mini_js.y"
                   { print_prod("val -> ID INC"); yyval.c = to_vector(yyvsp[-1].v) + "@" + to_vector(yyvsp[-1].v) + to_vector(yyvsp[-1].v) + "@" + "1" + "+" + "=" + "^"; }
-#line 2229 "y.tab.c"
+#line 2233 "y.tab.c"
     break;
 
 
-#line 2233 "y.tab.c"
+#line 2237 "y.tab.c"
 
       default: break;
     }
@@ -2467,7 +2471,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 311 "mini_js.y"
+#line 315 "mini_js.y"
 
 
 // Include do arquivo do lex - integracao
@@ -2491,13 +2495,6 @@ void print_NPR(vector<string> c) {
 
 void print_prod(const char *s) {
   cout << s << endl;
-}
-
-string int_to_string(int n) {
-  stringstream ss;
-  ss << n;
-  cout << "oioooooooo" << n << endl;
-  return ss.str();
 }
 
 vector<string> gera_retorno() {
@@ -2524,6 +2521,17 @@ void atualiza_variaveis_declaradas(string var) {
     variaveis_declaradas[var] = yylloc.first_line;
   } else {
     cout << "Erro: a variável '" << var << "' já foi declarada na linha " << variaveis_declaradas[var] << "." << endl;
+    exit(1);
+  }
+}
+
+void atualiza_variaveis_declaradas_funcao(string var) {
+  auto it = variaveis_declaradas_funcao.find(var);
+
+  if (it == variaveis_declaradas_funcao.end()) {
+    variaveis_declaradas_funcao[var] = yylloc.first_line;
+  } else {
+    cout << "Erro: a variável '" << var << "' já foi declarada na linha " << variaveis_declaradas_funcao[var] << "." << endl;
     exit(1);
   }
 }
