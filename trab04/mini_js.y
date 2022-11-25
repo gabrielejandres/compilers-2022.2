@@ -61,16 +61,16 @@ vector<string> tokeniza(string s);
 vector<string> gera_funcao(string id, string label);
 vector<string> gera_fim_funcao();
 vector<string> gera_retorno();
-void atualiza_variaveis_declaradas_funcao(string var);
+void atualiza_variaveis_declaradas_escopo(string var);
 
 // Variaveis
 map<string, int> variaveis_declaradas;
-map<string, int> variaveis_declaradas_funcao;
+map<string, int> variaveis_declaradas_escopo;
 vector<string> epsilon;
 vector<string> funcoes;
 int n_params;
 vector<bool> pode_retornar = { false };
-bool eh_funcao = false;
+bool eh_escopo = false;
 vector<map<string, Simbolo>> ts = {};
 
 %}
@@ -129,6 +129,7 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
   | CONST decl        { print_prod("cmd_1 -> CONST decl"); $$.c = $2.c; }
   | loop              { print_prod("cmd_1 -> loop"); }
   | exp ASM           { print_prod("cmd_1 -> exp ASM"); $$.c = $1.c + $2.c + "^"; }
+  | exp               { print_prod("cmd_1 -> exp"); $$.c = $1.c; }
   | RETURN            { print_prod("cmd_1 -> RETURN"); 
                         if(!pode_retornar.back()) {
                             yyerror("Comando RETURN fora de funcao");
@@ -145,7 +146,11 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
 
 cmd_2 : condicional       { print_prod("cmd_2 -> condicional"); }
   | funcao                { print_prod("cmd_2 -> funcao"); }
+  | bloco                 { print_prod("cmd_2 -> bloco"); }
   ;
+
+bloco: '{' empilha_escopo cmds '}' desempilha_escopo { print_prod("bloco -> { empilha_escopo cmds } desempilha_escopo"); $$.c = "<{" + $3.c + "}>"; }
+  ; 
 
 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo  desempilha_escopo_func { 
                                           print_prod("funcao -> FUNCTION ID ( args ) corpo"); 
@@ -162,13 +167,13 @@ funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo  desempilha_escopo_fu
   ;
 
 args: args ',' arg { print_prod("args -> args , arg"); 
-                      atualiza_variaveis_declaradas_funcao($3.v);
+                      atualiza_variaveis_declaradas_escopo($3.v);
                       $$.v = "";
                       $$.n_args = $1.n_args + 1; 
                       $$.c = $1.c + gera_inicializacao_de_argumento($3.v, $$.n_args);
                   }
   | arg            { print_prod("args -> arg"); 
-                     atualiza_variaveis_declaradas_funcao($1.v);
+                     atualiza_variaveis_declaradas_escopo($1.v);
                      $$.v = "";
                      $$.n_args = 1;
                      $$.c = gera_inicializacao_de_argumento($1.v, $$.n_args);
@@ -192,16 +197,16 @@ arg: ID { print_prod("arg -> ID");
           }
   ;
 
-empilha_escopo_func: empilha_escopo { print_prod("empilha_escopo_func -> empilha_escopo"); pode_retornar.push_back(true); eh_funcao = true; }
+empilha_escopo_func: empilha_escopo { print_prod("empilha_escopo_func -> empilha_escopo"); pode_retornar.push_back(true); }
   ;
 
-desempilha_escopo_func: desempilha_escopo { print_prod("desempilha_escopo_func -> desempilha_escopo"); pode_retornar.pop_back(); eh_funcao = false; }
+desempilha_escopo_func: desempilha_escopo { print_prod("desempilha_escopo_func -> desempilha_escopo"); pode_retornar.pop_back(); }
   ;
 
-empilha_escopo: { print_prod("empilha_escopo -> "); ts.push_back(map<string, Simbolo>{}); }
+empilha_escopo: { print_prod("empilha_escopo -> "); ts.push_back(map<string, Simbolo>{}); eh_escopo = true; }
   ;
 
-desempilha_escopo: { print_prod("desempilha_escopo -> "); ts.pop_back(); }
+desempilha_escopo: { print_prod("desempilha_escopo -> "); ts.pop_back(); eh_escopo = false; }
   ;
 
 atr: atr_id         { print_prod("atr -> atr_id"); }
@@ -249,8 +254,8 @@ indices: '[' exp ']' indices { print_prod("indices -> [ exp ] indices"); $$.c = 
   | '[' exp ']'              { print_prod("indices -> [ exp ]"); $$.c = $2.c; }
   ;
 
-decl: ID '=' exp fim_decl { if(eh_funcao) atualiza_variaveis_declaradas_funcao($1.v); else atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + $3.c + "=" + "^" + $4.c; }
-  | ID fim_decl           { if(eh_funcao) atualiza_variaveis_declaradas_funcao($1.v); else atualiza_variaveis_declaradas($1.v);  print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "&" + $2.c; }
+decl: ID '=' exp fim_decl { if(eh_escopo) atualiza_variaveis_declaradas_escopo($1.v); else atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + $3.c + "=" + "^" + $4.c; }
+  | ID fim_decl           { if(eh_escopo) atualiza_variaveis_declaradas_escopo($1.v); else atualiza_variaveis_declaradas($1.v);  print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "&" + $2.c; }
   ;
 
 fim_decl: ',' decl     { print_prod("fim_decl -> , decl"); $$.c = $2.c; }
@@ -292,6 +297,7 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
   | exp '-' exp         { print_prod("exp -> exp - exp"); $$.c = $1.c + $3.c + "-"; }
   | exp '*' exp         { print_prod("exp -> exp * exp"); $$.c = $1.c + $3.c + "*"; }
   | exp '/' exp         { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
+  | exp '%' exp         { print_prod("exp -> exp % exp"); $$.c = $1.c + $3.c + "%"; }
   | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
   | val                 { print_prod("exp -> val"); }
   | exp '(' params ')'  { print_prod("exp -> exp ( params )"); $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$"; n_params = 0;}
@@ -355,6 +361,7 @@ vector<string> gera_funcao(string id, string label) {
 }
 
 void atualiza_variaveis_declaradas(string var) {
+  cout << "var global" << var << endl;
   auto it = variaveis_declaradas.find(var);
 
   if (it == variaveis_declaradas.end()) {
@@ -365,13 +372,14 @@ void atualiza_variaveis_declaradas(string var) {
   }
 }
 
-void atualiza_variaveis_declaradas_funcao(string var) {
-  auto it = variaveis_declaradas_funcao.find(var);
+void atualiza_variaveis_declaradas_escopo(string var) {
+  cout << "var func" << var << endl;
+  auto it = variaveis_declaradas_escopo.find(var);
 
-  if (it == variaveis_declaradas_funcao.end()) {
-    variaveis_declaradas_funcao[var] = yylloc.first_line;
+  if (it == variaveis_declaradas_escopo.end()) {
+    variaveis_declaradas_escopo[var] = yylloc.first_line;
   } else {
-    cout << "Erro: a variável '" << var << "' já foi declarada na linha " << variaveis_declaradas_funcao[var] << "." << endl;
+    cout << "Erro: a variável '" << var << "' já foi declarada na linha " << variaveis_declaradas_escopo[var] << "." << endl;
     exit(1);
   }
 }
