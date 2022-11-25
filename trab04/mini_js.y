@@ -97,6 +97,7 @@ vector<map<string, Simbolo>> ts = {};
 %token FUNCTION
 %token ASM
 %token RETURN
+%token BLOCO
 
 // Start indica o simbolo inicial da gramatica
 %start s
@@ -277,8 +278,8 @@ for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo { print_prod("for_loop
   | FOR '(' atr ';' condicao ';' atr ')' corpo            { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $3.c + "^" + (":" + inicio_for) + $5.c + "!" + fim_for + "?" + $9.c + $7.c + "^" + inicio_for + "#" + (":" + fim_for); }
   ;
 
-condicional: IF '(' condicao ')' corpo ELSE corpo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + else_label + "?" + $5.c + fim_if + "#" + (":" + else_label) + $7.c + (":" + fim_if); }
-	| IF '(' condicao ')' corpo %prec 'T'           { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + fim_if + "?" + $5.c + (":" + fim_if);}
+condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo  ELSE empilha_escopo corpo desempilha_escopo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + else_label + "?" + $6.c + fim_if + "#" + (":" + else_label) + $10.c + (":" + fim_if); }
+	| IF '(' condicao ')' empilha_escopo corpo desempilha_escopo  %prec 'T'           { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + fim_if + "?" + $6.c + (":" + fim_if);}
 	;
 
 corpo: '{' cmds '}'           { print_prod("corpo -> { cmds }"); $$.c = $2.c; }
@@ -316,6 +317,7 @@ val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
   | ARRAY         { print_prod("val -> ARRAY"); }
   | STRING        { print_prod("val -> STRING"); }
   | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + "@" + to_vector($1.v) + to_vector($1.v) + "@" + "1" + "+" + "=" + "^"; }
+  | BLOCO         { print_prod("val -> BLOCO VAZIO"); }
   ;
 
 %%

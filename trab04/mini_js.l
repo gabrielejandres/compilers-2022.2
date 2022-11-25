@@ -62,6 +62,9 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 "return"    { atualiza_atributos_token(RETURN);
                 return RETURN; }
 
+"{ }"       { atualiza_atributos_token(BLOCO);
+                return BLOCO; }
+
 "asm{".*"}"  {  yylval.c = tokeniza(yytext + 3);
                 return ASM; }
 
