@@ -215,9 +215,9 @@ atr: atr_id         { print_prod("atr -> atr_id"); }
   | atr_array       { print_prod("atr -> atr_array"); }
   ;
 
-atr_id: ID '=' exp            { verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID = exp"); $$.c = to_vector($1.v) + $3.c + "="; }
-  | ID '=' atr_recursiva      { verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID = atr_recursiva"); $$.c = to_vector($1.v) + $3.c + "="; }
-  | ID ADD exp                { verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID ADD exp_id"); $$.c = to_vector($1.v) + to_vector($1.v) + "@" + $3.c + "+" + "="; }
+atr_id: ID '=' exp            { if(!eh_escopo) verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID = exp"); $$.c = to_vector($1.v) + $3.c + "="; }
+  | ID '=' atr_recursiva      { if(!eh_escopo) verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID = atr_recursiva"); $$.c = to_vector($1.v) + $3.c + "="; }
+  | ID ADD exp                { if(!eh_escopo) verifica_variaveis_declaradas($1.v); print_prod("atr_id -> ID ADD exp_id"); $$.c = to_vector($1.v) + to_vector($1.v) + "@" + $3.c + "+" + "="; }
   ;
 
 // nova regra para adicao do @ no final para pegar o valor do id
@@ -225,16 +225,17 @@ atr_recursiva: ID '=' exp    { print_prod("atr_recursiva -> ID = exp"); $$.c = t
   | ID '=' atr_recursiva     { print_prod("atr_recursiva -> ID = atr_recursiva"); $$.c = to_vector($1.v) + $3.c + "="; }
   ;
 
-atr_obj: ID '.' prop '=' exp     { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . prop = exp"); $$.c = to_vector($1.v) + "@" + $3.c + $5.c + "[=]"; }
-  | ID '.' prop ADD exp          { verifica_variaveis_declaradas($1.v); print_prod("atr_obj -> ID . prop ADD exp"); $$.c = to_vector($1.v) + "@" + $3.c + to_vector($1.v) + "@" + $3.c + "[@]" + $5.c + "+" + "[=]"; }
+atr_obj: ID '.' prop '=' exp     { print_prod("atr_obj -> ID . prop = exp"); $$.c = $1.c + "@" + $3.c + $5.c + "[=]"; }
+  | ID '.' prop ADD exp          { print_prod("atr_obj -> ID . prop ADD exp"); $$.c = $1.c + "@" + $3.c + to_vector($1.v) + "@" + $3.c + "[@]" + $5.c + "+" + "[=]"; }
+  | '(' exp ')' '.' prop '=' exp { print_prod("atr_obj -> ID . prop = exp"); $$.c = $2.c + $5.c + $7.c + "[=]"; }
   ;
 
 prop: ID            { print_prod("prop -> ID"); }
   | ID '[' exp ']'  { print_prod("prop -> ID [ exp ]"); $$.c = to_vector($1.v) + "[@]" + $3.c; }
   ;
 
-atr_array: ID indices '=' rec     { verifica_variaveis_declaradas($1.v); print_prod("atr_array -> ID indices = exp"); $$.c = to_vector($1.v) + "@" + $2.c + $4.c + "[=]"; }
-  | ID '[' atr ']' '=' exp        { verifica_variaveis_declaradas($1.v); print_prod("atr_array -> ID [ atr ] = exp"); $$.c = to_vector($1.v) + "@" + $3.c + $6.c + "[=]"; }
+atr_array: exp indices '=' rec     { if(!eh_escopo) verifica_variaveis_declaradas($1.v); print_prod("atr_array -> ID indices = exp"); $$.c = $1.c + $2.c + $4.c + "[=]"; }
+  | ID '[' atr ']' '=' exp        { if(!eh_escopo) verifica_variaveis_declaradas($1.v); print_prod("atr_array -> ID [ atr ] = exp"); $$.c = to_vector($1.v) + "@" + $3.c + $6.c + "[=]"; }
   ;
 
 rec: exp          { print_prod("rec -> ID indices = exp"); } 
@@ -317,7 +318,7 @@ val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
   | ARRAY         { print_prod("val -> ARRAY"); }
   | STRING        { print_prod("val -> STRING"); }
   | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + "@" + to_vector($1.v) + to_vector($1.v) + "@" + "1" + "+" + "=" + "^"; }
-  | BLOCO         { print_prod("val -> BLOCO VAZIO"); }
+  | BLOCO         { print_prod("val -> BLOCO VAZIO"); $$.c = to_vector("{}"); }
   ;
 
 %%
@@ -363,7 +364,7 @@ vector<string> gera_funcao(string id, string label) {
 }
 
 void atualiza_variaveis_declaradas(string var) {
-  cout << "var global" << var << endl;
+  // cout << "var global" << var << endl;
   auto it = variaveis_declaradas.find(var);
 
   if (it == variaveis_declaradas.end()) {
@@ -375,7 +376,7 @@ void atualiza_variaveis_declaradas(string var) {
 }
 
 void atualiza_variaveis_declaradas_escopo(string var) {
-  cout << "var func" << var << endl;
+  // cout << "var func" << var << endl;
   auto it = variaveis_declaradas_escopo.find(var);
 
   if (it == variaveis_declaradas_escopo.end()) {
