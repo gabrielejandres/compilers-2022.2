@@ -1,3 +1,5 @@
+%option noyywrap
+
 DELIM   [\t\n ]
 DIGITO  [0-9]
 LETRA   [A-Za-z_]
@@ -7,6 +9,7 @@ ESCAPE          [\\][^\n]
 ASPAS_SMP       \'([^']|{ESCAPE}|(\'\'))*\'
 ASPAS_DP        \"([^"]|{ESCAPE}|(\"\"))*\"
 STRING          {ASPAS_SMP}|{ASPAS_DP}
+ARRAY_VAZIO    \[{DELIM}*\]
 
 %%
 
@@ -67,6 +70,9 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 
 "asm{".*"}"  {  yylval.c = tokeniza(yytext + 3);
                 return ASM; }
+
+{ARRAY_VAZIO} { atualiza_atributos_token(ARRAY_VAZIO);
+                return ARRAY_VAZIO; }
 
 {ID}       { atualiza_atributos_token(ID);
              return ID; }
