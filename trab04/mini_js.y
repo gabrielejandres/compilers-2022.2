@@ -124,9 +124,7 @@ cmds : cmd_1 separador cmds   { print_prod("cmds -> cmd_1 ; cmds"); $$.c = $1.c 
   ;
 
 cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
-  | LET decl          { print_prod("cmd_1 -> LET decl"); if(escopos.size() > 0) atualiza_variaveis_declaradas_escopo($2.c[0], $1.v); else atualiza_variaveis_declaradas($2.c[0], $1.v); $$.c = $2.c; }
-  | VAR decl          { print_prod("cmd_1 -> VAR decl"); if(escopos.size() > 0) atualiza_variaveis_declaradas_escopo($2.c[0], $1.v); else atualiza_variaveis_declaradas($2.c[0], $1.v); $$.c = $2.c; }
-  | CONST decl        { print_prod("cmd_1 -> CONST decl"); if(escopos.size() > 0) atualiza_variaveis_declaradas_escopo($2.c[0], $1.v); else atualiza_variaveis_declaradas($2.c[0], $1.v); $$.c = $2.c; }
+  | tipo_var decl     { print_prod("cmd_1 -> tipo_var decl"); if(escopos.size() > 0) atualiza_variaveis_declaradas_escopo($2.c[0], $1.v); else atualiza_variaveis_declaradas($2.c[0], $1.v); $$.c = $2.c; }
   | loop              { print_prod("cmd_1 -> loop"); }
   | exp ASM           { print_prod("cmd_1 -> exp ASM"); $$.c = $1.c + $2.c + "^"; }
   | exp               { print_prod("cmd_1 -> exp"); $$.c = $1.c; }
@@ -146,6 +144,12 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
                          $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$" + "^"; 
                          n_params = 0; 
                        }
+  | funcao             { print_prod("cmd_1 -> funcao"); }
+  ;
+
+tipo_var: LET { print_prod("tipo_var -> LET"); $$.v = $1.v; }
+  | VAR { print_prod("tipo_var -> VAR"); $$.v = $1.v; }
+  | CONST { print_prod("tipo_var -> CONST"); $$.v = $1.v; }
   ;
 
 cmd_2 : condicional       { print_prod("cmd_2 -> condicional"); }
@@ -338,9 +342,16 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
                         }
   ;
 
-params: exp ',' params { print_prod("params -> exp , params"); $$.c = $1.c + $3.c; n_params++; }
-  | exp                { print_prod("params -> exp"); $$.c = $1.c; n_params++; }
-  |                    { print_prod("params -> epsilon"); $$.c = epsilon; }
+params: param ',' params { print_prod("params -> param , params"); $$.c = $1.c + $3.c; n_params++; }
+  | param                { print_prod("params -> param"); $$.c = $1.c; n_params++; }
+  |                      { print_prod("params -> epsilon"); $$.c = epsilon; }
+  ;
+
+param: exp     { print_prod("param -> exp"); }
+  | ID '=' exp { print_prod("param -> ID = exp");
+                 $$.v = $1.v;
+                 $$.c = $1.c + $3.c + "=";
+               }
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
