@@ -1806,7 +1806,7 @@ yyreduce:
 
   case 15:
 #line 146 "mini_js.y"
-                       {print_prod("cmd_1 -> exp '(' params ')'"); yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].v + "@" + "$" + "^";}
+                       {print_prod("cmd_1 -> exp '(' params ')'"); yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].v + "@" + "$" + "^"; n_params = 0; }
 #line 1811 "y.tab.c"
     break;
 
@@ -1922,7 +1922,7 @@ yyreduce:
 
   case 29:
 #line 208 "mini_js.y"
-                { print_prod("empilha_escopo -> "); if(eh_escopo) { escopo_superior = true; cout << "TEM ESCOPO SUPERIORR" << endl; }eh_escopo = true; }
+                { print_prod("empilha_escopo -> "); if(eh_escopo) { escopo_superior = true; }eh_escopo = true; }
 #line 1927 "y.tab.c"
     break;
 
@@ -2179,7 +2179,7 @@ yyreduce:
                                                                                       if (escopo_superior) {
                                                                                         yyval.c = yyvsp[-4].c + "!" + fim_if + "?" + yyvsp[-1].c + fim_if + "#" + (":" + fim_if);
                                                                                       } else {
-                                                                                        yyval.c = yyvsp[-4].c + "!" + fim_if + "?" + "<{" + yyvsp[-1].c + "}>" + (":" + fim_if) + fim_if + "#";
+                                                                                        yyval.c = yyvsp[-4].c + "!" + fim_if + "?" + "<{" + yyvsp[-1].c + "}>" + fim_if + "#" + (":" + fim_if);
                                                                                       }
                                                                                     }
 #line 2186 "y.tab.c"

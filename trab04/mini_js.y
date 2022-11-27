@@ -143,7 +143,10 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
                         }
                         $$.c = $2.c + gera_retorno(); 
                       } 
-  | exp '(' params ')' {print_prod("cmd_1 -> exp '(' params ')'"); $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$" + "^";}
+  | exp '(' params ')' { print_prod("cmd_1 -> exp '(' params ')'"); 
+                         $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$" + "^"; 
+                         n_params = 0; 
+                       }
   ;
 
 cmd_2 : condicional       { print_prod("cmd_2 -> condicional"); }
@@ -304,7 +307,7 @@ condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE emp
                                                                                       if (escopo_superior) {
                                                                                         $$.c = $3.c + "!" + fim_if + "?" + $6.c + fim_if + "#" + (":" + fim_if);
                                                                                       } else {
-                                                                                        $$.c = $3.c + "!" + fim_if + "?" + "<{" + $6.c + "}>" + (":" + fim_if) + fim_if + "#";
+                                                                                        $$.c = $3.c + "!" + fim_if + "?" + "<{" + $6.c + "}>" + fim_if + "#" + (":" + fim_if);
                                                                                       }
                                                                                     }
 	;
