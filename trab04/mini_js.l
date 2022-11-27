@@ -10,6 +10,7 @@ ASPAS_SMP       \'([^']|{ESCAPE}|(\'\'))*\'
 ASPAS_DP        \"([^"]|{ESCAPE}|(\"\"))*\"
 STRING          {ASPAS_SMP}|{ASPAS_DP}
 ARRAY_VAZIO    \[{DELIM}*\]
+OBJ_VAZIO       \{{DELIM}*\}
 
 %%
 
@@ -68,11 +69,11 @@ ARRAY_VAZIO    \[{DELIM}*\]
 "true"      { atualiza_atributos_token(TRUE);
                 return TRUE; }
 
-"{ }"       { atualiza_atributos_token(BLOCO);
-                return BLOCO; }
-
 "asm{".*"}"  {  yylval.c = tokeniza(yytext + 3);
                 return ASM; }
+
+{OBJ_VAZIO}       { atualiza_atributos_token(OBJ_VAZIO);
+                return OBJ_VAZIO; }
 
 {ARRAY_VAZIO} { atualiza_atributos_token(ARRAY_VAZIO);
                 return ARRAY_VAZIO; }
