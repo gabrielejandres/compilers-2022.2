@@ -65,6 +65,9 @@ ARRAY_VAZIO    \[{DELIM}*\]
 "return"    { atualiza_atributos_token(RETURN);
                 return RETURN; }
 
+"true"      { atualiza_atributos_token(TRUE);
+                return TRUE; }
+
 "{ }"       { atualiza_atributos_token(BLOCO);
                 return BLOCO; }
 

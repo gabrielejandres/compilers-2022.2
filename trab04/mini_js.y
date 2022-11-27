@@ -69,7 +69,7 @@ vector<string> funcoes;
 int n_params;
 vector<bool> pode_retornar = { false };
 bool eh_escopo = false;
-bool fim_chamada = false;
+bool escopo_superior = false;
 
 %}
 
@@ -97,6 +97,7 @@ bool fim_chamada = false;
 %token RETURN
 %token BLOCO
 %token ARRAY_VAZIO
+%token TRUE
 
 // Start indica o simbolo inicial da gramatica
 %start s
@@ -142,6 +143,7 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
                         }
                         $$.c = $2.c + gera_retorno(); 
                       } 
+  | exp '(' params ')' {print_prod("cmd_1 -> exp '(' params ')'"); $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$" + "^";}
   ;
 
 cmd_2 : condicional       { print_prod("cmd_2 -> condicional"); }
@@ -203,7 +205,7 @@ empilha_escopo_func: empilha_escopo { print_prod("empilha_escopo_func -> empilha
 desempilha_escopo_func: desempilha_escopo { print_prod("desempilha_escopo_func -> desempilha_escopo"); pode_retornar.pop_back(); }
   ;
 
-empilha_escopo: { print_prod("empilha_escopo -> "); eh_escopo = true; }
+empilha_escopo: { print_prod("empilha_escopo -> "); if(eh_escopo) { escopo_superior = true; }eh_escopo = true; }
   ;
 
 desempilha_escopo: { print_prod("desempilha_escopo -> "); variaveis_declaradas_escopo.clear(); eh_escopo = false; }
@@ -268,7 +270,7 @@ decl: ID '=' exp fim_decl { print_prod("decl -> ID = exp fim_decl");
   | ID fim_decl           { print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "&" + $2.c; }
   ;
 
-fim_decl: ',' decl     { print_prod("fim_decl -> , decl"); $$.c = $2.c; }
+fim_decl: ',' decl     { print_prod("fim_decl -> , decl"); $$.c = $2.c; if (!eh_escopo) atualiza_variaveis_declaradas($2.c[0], "var"); } // atencao t4
   |                    { print_prod("fim_decl -> epsilon"); $$.c = epsilon; }
   ;
 
@@ -287,8 +289,24 @@ for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo { print_prod("for_loop
   | FOR '(' atr ';' condicao ';' atr ')' corpo            { print_prod("for_loop -> FOR ( decl ; condicao ; atr ) corpo"); string inicio_for = gera_label("inicio_for"); string fim_for = gera_label("fim_for"); $$.c = $3.c + "^" + (":" + inicio_for) + $5.c + "!" + fim_for + "?" + $9.c + $7.c + "^" + inicio_for + "#" + (":" + fim_for); }
   ;
 
-condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo  ELSE empilha_escopo corpo desempilha_escopo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); string else_label = gera_label("else"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + else_label + "?" + $6.c + fim_if + "#" + (":" + else_label) + $10.c + (":" + fim_if); }
-	| IF '(' condicao ')' empilha_escopo corpo desempilha_escopo  %prec 'T'           { print_prod("condicional -> IF (condicao) corpo"); string fim_if = gera_label("fim_if"); $$.c = $3.c + "!" + fim_if + "?" + $6.c + (":" + fim_if);}
+condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo { print_prod("condicional -> IF (condicao) corpo ELSE corpo"); 
+                                                                                                                      string else_label = gera_label("else"); 
+                                                                                                                      string fim_if = gera_label("fim_if"); 
+                                                                                                                      if(escopo_superior) {
+                                                                                                                        $$.c = $3.c + "!" + else_label + "?" + $6.c + fim_if + "#" + (":" + else_label) + $10.c + (":" + fim_if); 
+                                                                                                                      }
+                                                                                                                      else {
+                                                                                                                        $$.c = $3.c + "!" + else_label + "?" + "<{" + $6.c + "}>" + fim_if + "#" + (":" + else_label) + "<{" + $10.c + "}>" + (":" + fim_if); 
+                                                                                                                      }
+                                                                                                                    }
+	| IF '(' condicao ')' empilha_escopo corpo desempilha_escopo  %prec 'T'           { print_prod("condicional -> IF (condicao) corpo"); 
+                                                                                      string fim_if = gera_label("fim_if"); 
+                                                                                      if (escopo_superior) {
+                                                                                        $$.c = $3.c + "!" + fim_if + "?" + $6.c + fim_if + "#" + (":" + fim_if);
+                                                                                      } else {
+                                                                                        $$.c = $3.c + "!" + fim_if + "?" + "<{" + $6.c + "}>" + (":" + fim_if) + fim_if + "#";
+                                                                                      }
+                                                                                    }
 	;
 
 corpo: '{' cmds '}'           { print_prod("corpo -> { cmds }"); $$.c = $2.c; }
@@ -301,6 +319,7 @@ condicao: exp '>' exp   { print_prod("condicao -> exp > exp"); $$.c = $1.c + $3.
   | exp IGUAL exp       { print_prod("condicao -> exp IGUAL exp"); $$.c = $1.c + $3.c + "=="; }
   | exp DIF exp         { print_prod("condicao -> exp DIF exp"); $$.c = $1.c + $3.c + "!="; }
   | exp                 { print_prod("condicao -> exp"); $$.c = $1.c; }
+  | matrix              { print_prod("condicao -> matrix"); $$.c = $1.c + "[@]"; }
   ;
 
 exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "+"; }
@@ -311,8 +330,7 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
   | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
   | val                 { print_prod("exp -> val"); }
   | exp '(' params ')'  { print_prod("exp -> exp ( params )"); 
-                          if(fim_chamada && $1.v != "f") $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$" + "^";
-                          else $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$"; 
+                          $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$";
                           n_params = 0;
                         }
   ;
@@ -325,13 +343,14 @@ params: exp ',' params { print_prod("params -> exp , params"); $$.c = $1.c + $3.
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
   | NUM           { print_prod("val -> NUM"); }
   | '-' NUM       { print_prod("val -> - NUM"); $$.c = to_vector("0") + $2.c + "-" ; }
-  | '(' exp ')'   { print_prod("val -> ( exp )"); $$ = $2; $$.c = $2.c; fim_chamada = true; }
+  | '(' exp ')'   { print_prod("val -> ( exp )"); $$ = $2; $$.c = $2.c; }
   | OBJ           { print_prod("val -> OBJ"); }
   | ARRAY         { print_prod("val -> ARRAY"); }
   | STRING        { print_prod("val -> STRING"); }
   | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + "@" + to_vector($1.v) + to_vector($1.v) + "@" + "1" + "+" + "=" + "^"; }
   | BLOCO         { print_prod("val -> BLOCO VAZIO"); $$.c = to_vector("{}"); }
   | ARRAY_VAZIO   { print_prod("val -> ARRAY_VAZIO"); $$.c = to_vector("[]"); }
+  | TRUE          { print_prod("val -> TRUE"); }
   ;
 
 %%
