@@ -1803,8 +1803,8 @@ yyreduce:
 
   case 13:
 #line 143 "mini_js.y"
-                       { print_prod("cmd_1 -> exp '(' params ')'"); 
-                         yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].v + "@" + "$" + "^"; 
+                       { print_prod("cmd_1 -> exp '(' params ')'"); // chamada de funcao
+                         yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].c + "$" + "^"; 
                          n_params = 0; 
                        }
 #line 1811 "y.tab.c"
@@ -2314,7 +2314,7 @@ yyreduce:
   case 88:
 #line 339 "mini_js.y"
                         { print_prod("exp -> exp ( params )"); 
-                          yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].v + "@" + "$";
+                          yyval.c = yyvsp[-1].c + to_string(n_params) + yyvsp[-3].c + "$";
                           n_params = 0;
                         }
 #line 2321 "y.tab.c"

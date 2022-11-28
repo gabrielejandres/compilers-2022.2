@@ -140,8 +140,8 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
                         }
                         $$.c = $2.c + gera_retorno(); 
                       } 
-  | exp '(' params ')' { print_prod("cmd_1 -> exp '(' params ')'"); 
-                         $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$" + "^"; 
+  | exp '(' params ')' { print_prod("cmd_1 -> exp '(' params ')'"); // chamada de funcao
+                         $$.c = $3.c + to_string(n_params) + $1.c + "$" + "^"; 
                          n_params = 0; 
                        }
   | funcao             { print_prod("cmd_1 -> funcao"); }
@@ -337,7 +337,7 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
   | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
   | val                 { print_prod("exp -> val"); }
   | exp '(' params ')'  { print_prod("exp -> exp ( params )"); 
-                          $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$";
+                          $$.c = $3.c + to_string(n_params) + $1.c + "$";
                           n_params = 0;
                         }
   ;
