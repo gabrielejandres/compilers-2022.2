@@ -4,18 +4,22 @@ Terminals unused in grammar
     ':'
 
 
-State 2 conflicts: 1 shift/reduce
+State 2 conflicts: 2 shift/reduce
 State 13 conflicts: 10 shift/reduce
 State 26 conflicts: 22 reduce/reduce
 State 35 conflicts: 2 shift/reduce
 State 48 conflicts: 2 shift/reduce
-State 70 conflicts: 1 shift/reduce
-State 126 conflicts: 2 shift/reduce
-State 129 conflicts: 22 reduce/reduce
-State 132 conflicts: 1 shift/reduce
-State 137 conflicts: 2 shift/reduce
-State 150 conflicts: 19 shift/reduce, 1 reduce/reduce
-State 156 conflicts: 2 reduce/reduce
+State 71 conflicts: 2 shift/reduce
+State 74 conflicts: 2 shift/reduce
+State 89 conflicts: 1 shift/reduce
+State 131 conflicts: 2 shift/reduce
+State 134 conflicts: 22 reduce/reduce
+State 137 conflicts: 1 shift/reduce
+State 142 conflicts: 2 shift/reduce
+State 146 conflicts: 1 shift/reduce
+State 151 conflicts: 1 shift/reduce
+State 159 conflicts: 19 shift/reduce, 1 reduce/reduce
+State 165 conflicts: 2 reduce/reduce
 
 
 Grammar
@@ -36,178 +40,181 @@ Grammar
    10      | RETURN
    11      | RETURN exp
    12      | exp '(' params ')'
-   13      | funcao
+   13      | ID '.' ID '(' params ')'
+   14      | ID '.' ID '.' ID '[' exp ']' '(' params ')'
+   15      | funcao
 
-   14 tipo_var: LET
-   15         | VAR
-   16         | CONST
+   16 tipo_var: LET
+   17         | VAR
+   18         | CONST
 
-   17 cmd_2: condicional
-   18      | funcao
-   19      | bloco
+   19 cmd_2: condicional
+   20      | funcao
+   21      | bloco
 
-   20 bloco: '{' empilha_escopo cmds '}' desempilha_escopo
+   22 bloco: '{' empilha_escopo cmds '}' desempilha_escopo
 
-   21 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo desempilha_escopo_func
-   22       | FUNCTION ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func
+   23 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo desempilha_escopo_func
+   24       | FUNCTION ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func
 
-   23 args: args ',' arg
-   24     | arg
+   25 args: args ',' arg
+   26     | arg
 
-   25 arg: ID
-   26    | ID '=' exp
-   27    | exp
+   27 arg: ID
+   28    | ID '=' exp
+   29    | exp
 
-   28 empilha_escopo_func: empilha_escopo
+   30 empilha_escopo_func: empilha_escopo
 
-   29 desempilha_escopo_func: desempilha_escopo
+   31 desempilha_escopo_func: desempilha_escopo
 
-   30 empilha_escopo: %empty
+   32 empilha_escopo: %empty
 
-   31 desempilha_escopo: %empty
+   33 desempilha_escopo: %empty
 
-   32 atr: atr_id
-   33    | atr_obj
-   34    | atr_array
+   34 atr: atr_id
+   35    | atr_obj
+   36    | atr_array
 
-   35 atr_id: ID '=' exp
-   36       | ID '=' atr_recursiva
-   37       | ID ADD exp
+   37 atr_id: ID '=' exp
+   38       | ID '=' atr_recursiva
+   39       | ID ADD exp
 
-   38 atr_recursiva: ID '=' exp
-   39              | ID '=' atr_recursiva
+   40 atr_recursiva: ID '=' exp
+   41              | ID '=' atr_recursiva
 
-   40 atr_obj: ID '.' prop '=' exp
-   41        | ID '.' prop ADD exp
-   42        | '(' exp ')' '.' prop '=' exp
+   42 atr_obj: ID '.' prop '=' exp
+   43        | ID '.' prop ADD exp
+   44        | '(' exp ')' '.' prop '=' exp
 
-   43 prop: ID
-   44     | ID '[' exp ']'
+   45 prop: exp
+   46     | ID '.' prop
+   47     | ID '[' exp ']'
 
-   45 atr_array: exp indices '=' rec
-   46          | ID '[' atr ']' '=' exp
-   47          | ID '[' exp ']' '=' exp
+   48 atr_array: exp indices '=' rec
+   49          | ID '[' atr ']' '=' exp
+   50          | ID '[' exp ']' '=' exp
 
-   48 rec: exp
-   49    | matexp
-   50    | exp '=' rec
-   51    | atr_array
+   51 rec: exp
+   52    | matexp
+   53    | exp '=' rec
+   54    | atr_array
 
-   52 matexp: matrix
-   53       | matexp '*' matexp
-   54       | matexp '+' matexp
+   55 matexp: matrix
+   56       | matexp '*' matexp
+   57       | matexp '+' matexp
 
-   55 matrix: ID indices
+   58 matrix: ID indices
 
-   56 indices: '[' exp ']' indices
-   57        | '[' exp ']'
+   59 indices: '[' exp ']' indices
+   60        | '[' exp ']'
 
-   58 decl: ID '=' exp fim_decl
-   59     | ID fim_decl
+   61 decl: ID '=' exp fim_decl
+   62     | ID fim_decl
 
-   60 fim_decl: ',' decl
-   61         | %empty
+   63 fim_decl: ',' decl
+   64         | %empty
 
-   62 loop: while_loop
-   63     | for_loop
+   65 loop: while_loop
+   66     | for_loop
 
-   64 separador: separador ';'
-   65          | %empty
+   67 separador: separador ';'
+   68          | %empty
 
-   66 while_loop: WHILE '(' condicao ')' corpo
+   69 while_loop: WHILE '(' condicao ')' corpo
 
-   67 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo
-   68         | FOR '(' atr ';' condicao ';' atr ')' corpo
+   70 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo
+   71         | FOR '(' atr ';' condicao ';' atr ')' corpo
 
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' condicao ')' empilha_escopo corpo desempilha_escopo
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' condicao ')' empilha_escopo corpo desempilha_escopo
 
-   71 corpo: '{' cmds '}'
-   72      | cmd_1 ';'
-   73      | cmd_2
+   74 corpo: '{' cmds '}'
+   75      | cmd_1 ';'
+   76      | cmd_2
 
-   74 condicao: exp '>' exp
-   75         | exp '<' exp
-   76         | exp IGUAL exp
-   77         | exp DIF exp
-   78         | exp
-   79         | matrix
+   77 condicao: exp '>' exp
+   78         | exp '<' exp
+   79         | exp IGUAL exp
+   80         | exp DIF exp
+   81         | exp
+   82         | matrix
 
-   80 exp: exp '+' exp
-   81    | exp '-' exp
-   82    | exp '*' exp
-   83    | exp '/' exp
-   84    | exp '%' exp
-   85    | ID '.' ID
-   86    | val
-   87    | exp '(' params ')'
+   83 exp: exp '+' exp
+   84    | exp '-' exp
+   85    | exp '*' exp
+   86    | exp '/' exp
+   87    | exp '%' exp
+   88    | exp '.' exp
+   89    | val
+   90    | exp '(' params ')'
 
-   88 params: param ',' params
-   89       | param
-   90       | %empty
+   91 params: param ',' params
+   92       | param
+   93       | %empty
 
-   91 param: exp
-   92      | ID '=' exp
+   94 param: exp
+   95      | ID '=' exp
 
-   93 val: ID
-   94    | NUM
-   95    | '-' NUM
-   96    | '(' exp ')'
-   97    | OBJ
-   98    | ARRAY
-   99    | STRING
-  100    | ID INC
-  101    | OBJ_VAZIO
-  102    | ARRAY_VAZIO
-  103    | TRUE
+   96 val: ID
+   97    | NUM
+   98    | '-' NUM
+   99    | '(' exp ')'
+  100    | OBJ
+  101    | ARRAY
+  102    | STRING
+  103    | ID INC
+  104    | OBJ_VAZIO
+  105    | ARRAY_VAZIO
+  106    | TRUE
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
-    '%' (37) 84
-    '(' (40) 12 21 22 42 66 67 68 69 70 87 96
-    ')' (41) 12 21 22 42 66 67 68 69 70 87 96
-    '*' (42) 53 82
-    '+' (43) 54 80
-    ',' (44) 23 60 88
-    '-' (45) 81 95
-    '.' (46) 40 41 42 85
-    '/' (47) 83
+    '%' (37) 87
+    '(' (40) 12 13 14 23 24 44 69 70 71 72 73 90 99
+    ')' (41) 12 13 14 23 24 44 69 70 71 72 73 90 99
+    '*' (42) 56 85
+    '+' (43) 57 83
+    ',' (44) 25 63 91
+    '-' (45) 84 98
+    '.' (46) 13 14 42 43 44 46 88
+    '/' (47) 86
     ':' (58)
-    ';' (59) 64 67 68 72
-    '<' (60) 75
-    '=' (61) 26 35 36 38 39 40 42 45 46 47 50 58 92
-    '>' (62) 74
+    ';' (59) 67 70 71 75
+    '<' (60) 78
+    '=' (61) 28 37 38 40 41 42 44 48 49 50 53 61 95
+    '>' (62) 77
     '?' (63)
     'T' (84)
-    '[' (91) 44 46 47 56 57
-    ']' (93) 44 46 47 56 57
-    '{' (123) 20 71
-    '}' (125) 20 71
+    '[' (91) 14 47 49 50 59 60
+    ']' (93) 14 47 49 50 59 60
+    '{' (123) 22 74
+    '}' (125) 22 74
     error (256)
-    NUM (258) 94 95
-    ID (259) 21 22 25 26 35 36 37 38 39 40 41 43 44 46 47 55 58 59 85 92 93 100
-    LET (260) 14 67
-    VAR (261) 15
-    CONST (262) 16
-    OBJ (263) 97
-    ARRAY (264) 98
-    STRING (265) 99
-    ADD (266) 37 41
-    IF (267) 69 70
-    ELSE (268) 69
-    IGUAL (269) 76
-    DIF (270) 77
-    INC (271) 100
-    WHILE (272) 66
-    FOR (273) 67 68
-    FUNCTION (274) 21 22
+    NUM (258) 97 98
+    ID (259) 13 14 23 24 27 28 37 38 39 40 41 42 43 46 47 49 50 58 61 62 95 96 103
+    LET (260) 16 70
+    VAR (261) 17
+    CONST (262) 18
+    OBJ (263) 100
+    ARRAY (264) 101
+    STRING (265) 102
+    ADD (266) 39 43
+    IF (267) 72 73
+    ELSE (268) 72
+    IGUAL (269) 79
+    DIF (270) 80
+    INC (271) 103
+    WHILE (272) 69
+    FOR (273) 70 71
+    FUNCTION (274) 23 24
     ASM (275) 8
     RETURN (276) 10 11
-    OBJ_VAZIO (277) 101
-    ARRAY_VAZIO (278) 102
-    TRUE (279) 103
+    OBJ_VAZIO (277) 104
+    ARRAY_VAZIO (278) 105
+    TRUE (279) 106
 
 
 Nonterminals, with rules where they appear
@@ -219,109 +226,109 @@ Nonterminals, with rules where they appear
         on right: 0
     cmds (47)
         on left: 2 3 4
-        on right: 1 2 3 20 71
+        on right: 1 2 3 22 74
     cmd_1 (48)
-        on left: 5 6 7 8 9 10 11 12 13
-        on right: 2 72
+        on left: 5 6 7 8 9 10 11 12 13 14 15
+        on right: 2 75
     tipo_var (49)
-        on left: 14 15 16
+        on left: 16 17 18
         on right: 6
     cmd_2 (50)
-        on left: 17 18 19
-        on right: 3 73
+        on left: 19 20 21
+        on right: 3 76
     bloco (51)
-        on left: 20
-        on right: 19
+        on left: 22
+        on right: 21
     funcao (52)
-        on left: 21 22
-        on right: 13 18
-    args (53)
         on left: 23 24
-        on right: 21 23
+        on right: 15 20
+    args (53)
+        on left: 25 26
+        on right: 23 25
     arg (54)
-        on left: 25 26 27
-        on right: 23 24
+        on left: 27 28 29
+        on right: 25 26
     empilha_escopo_func (55)
-        on left: 28
-        on right: 21 22
-    desempilha_escopo_func (56)
-        on left: 29
-        on right: 21 22
-    empilha_escopo (57)
         on left: 30
-        on right: 20 28 69 70
-    desempilha_escopo (58)
+        on right: 23 24
+    desempilha_escopo_func (56)
         on left: 31
-        on right: 20 29 69 70
+        on right: 23 24
+    empilha_escopo (57)
+        on left: 32
+        on right: 22 30 72 73
+    desempilha_escopo (58)
+        on left: 33
+        on right: 22 31 72 73
     atr (59)
-        on left: 32 33 34
-        on right: 5 46 67 68
+        on left: 34 35 36
+        on right: 5 49 70 71
     atr_id (60)
-        on left: 35 36 37
-        on right: 32
+        on left: 37 38 39
+        on right: 34
     atr_recursiva (61)
-        on left: 38 39
-        on right: 36 39
+        on left: 40 41
+        on right: 38 41
     atr_obj (62)
-        on left: 40 41 42
-        on right: 33
+        on left: 42 43 44
+        on right: 35
     prop (63)
-        on left: 43 44
-        on right: 40 41 42
-    atr_array (64)
         on left: 45 46 47
-        on right: 34 51
+        on right: 42 43 44 46
+    atr_array (64)
+        on left: 48 49 50
+        on right: 36 54
     rec (65)
-        on left: 48 49 50 51
-        on right: 45 50
+        on left: 51 52 53 54
+        on right: 48 53
     matexp (66)
-        on left: 52 53 54
-        on right: 49 53 54
+        on left: 55 56 57
+        on right: 52 56 57
     matrix (67)
-        on left: 55
-        on right: 52 79
+        on left: 58
+        on right: 55 82
     indices (68)
-        on left: 56 57
-        on right: 45 55 56
+        on left: 59 60
+        on right: 48 58 59
     decl (69)
-        on left: 58 59
-        on right: 6 60 67
+        on left: 61 62
+        on right: 6 63 70
     fim_decl (70)
-        on left: 60 61
-        on right: 58 59
+        on left: 63 64
+        on right: 61 62
     loop (71)
-        on left: 62 63
+        on left: 65 66
         on right: 7
     separador (72)
-        on left: 64 65
-        on right: 2 64
-    while_loop (73)
-        on left: 66
-        on right: 62
-    for_loop (74)
         on left: 67 68
-        on right: 63
+        on right: 2 67
+    while_loop (73)
+        on left: 69
+        on right: 65
+    for_loop (74)
+        on left: 70 71
+        on right: 66
     condicional (75)
-        on left: 69 70
-        on right: 17
+        on left: 72 73
+        on right: 19
     corpo (76)
-        on left: 71 72 73
-        on right: 21 22 66 67 68 69 70
+        on left: 74 75 76
+        on right: 23 24 69 70 71 72 73
     condicao (77)
-        on left: 74 75 76 77 78 79
-        on right: 66 67 68 69 70
+        on left: 77 78 79 80 81 82
+        on right: 69 70 71 72 73
     exp (78)
-        on left: 80 81 82 83 84 85 86 87
-        on right: 8 9 11 12 26 27 35 37 38 40 41 42 44 45 46 47 48 50 56 57 58 74 75 76 77 78 80 81 82 83 84 87 91 92 96
+        on left: 83 84 85 86 87 88 89 90
+        on right: 8 9 11 12 14 28 29 37 39 40 42 43 44 45 47 48 49 50 51 53 59 60 61 77 78 79 80 81 83 84 85 86 87 88 90 94 95 99
     params (79)
-        on left: 88 89 90
-        on right: 12 87 88
+        on left: 91 92 93
+        on right: 12 13 14 90 91
     param (80)
-        on left: 91 92
-        on right: 88 89
+        on left: 94 95
+        on right: 91 92
     val (81)
-        on left: 93 94 95 96 97 98 99 100 101 102 103
-        on right: 86
+        on left: 96 97 98 99 100 101 102 103 104 105 106
+        on right: 89
 
 
 State 0
@@ -371,23 +378,24 @@ State 0
 
 State 1
 
-   94 val: NUM .
+   97 val: NUM .
 
-    $default  reduce using rule 94 (val)
+    $default  reduce using rule 97 (val)
 
 
 State 2
 
-   35 atr_id: ID . '=' exp
-   36       | ID . '=' atr_recursiva
-   37       | ID . ADD exp
-   40 atr_obj: ID . '.' prop '=' exp
-   41        | ID . '.' prop ADD exp
-   46 atr_array: ID . '[' atr ']' '=' exp
-   47          | ID . '[' exp ']' '=' exp
-   85 exp: ID . '.' ID
-   93 val: ID .
-  100    | ID . INC
+   13 cmd_1: ID . '.' ID '(' params ')'
+   14      | ID . '.' ID '.' ID '[' exp ']' '(' params ')'
+   37 atr_id: ID . '=' exp
+   38       | ID . '=' atr_recursiva
+   39       | ID . ADD exp
+   42 atr_obj: ID . '.' prop '=' exp
+   43        | ID . '.' prop ADD exp
+   49 atr_array: ID . '[' atr ']' '=' exp
+   50          | ID . '[' exp ']' '=' exp
+   96 val: ID .
+  103    | ID . INC
 
     ADD  shift, and go to state 37
     INC  shift, and go to state 38
@@ -395,79 +403,80 @@ State 2
     '.'  shift, and go to state 40
     '['  shift, and go to state 41
 
-    '['       [reduce using rule 93 (val)]
-    $default  reduce using rule 93 (val)
+    '.'       [reduce using rule 96 (val)]
+    '['       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
 
 
 State 3
 
-   14 tipo_var: LET .
-
-    $default  reduce using rule 14 (tipo_var)
-
-
-State 4
-
-   15 tipo_var: VAR .
-
-    $default  reduce using rule 15 (tipo_var)
-
-
-State 5
-
-   16 tipo_var: CONST .
+   16 tipo_var: LET .
 
     $default  reduce using rule 16 (tipo_var)
 
 
+State 4
+
+   17 tipo_var: VAR .
+
+    $default  reduce using rule 17 (tipo_var)
+
+
+State 5
+
+   18 tipo_var: CONST .
+
+    $default  reduce using rule 18 (tipo_var)
+
+
 State 6
 
-   97 val: OBJ .
+  100 val: OBJ .
 
-    $default  reduce using rule 97 (val)
+    $default  reduce using rule 100 (val)
 
 
 State 7
 
-   98 val: ARRAY .
+  101 val: ARRAY .
 
-    $default  reduce using rule 98 (val)
+    $default  reduce using rule 101 (val)
 
 
 State 8
 
-   99 val: STRING .
+  102 val: STRING .
 
-    $default  reduce using rule 99 (val)
+    $default  reduce using rule 102 (val)
 
 
 State 9
 
-   69 condicional: IF . '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF . '(' condicao ')' empilha_escopo corpo desempilha_escopo
+   72 condicional: IF . '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF . '(' condicao ')' empilha_escopo corpo desempilha_escopo
 
     '('  shift, and go to state 42
 
 
 State 10
 
-   66 while_loop: WHILE . '(' condicao ')' corpo
+   69 while_loop: WHILE . '(' condicao ')' corpo
 
     '('  shift, and go to state 43
 
 
 State 11
 
-   67 for_loop: FOR . '(' LET decl ';' condicao ';' atr ')' corpo
-   68         | FOR . '(' atr ';' condicao ';' atr ')' corpo
+   70 for_loop: FOR . '(' LET decl ';' condicao ';' atr ')' corpo
+   71         | FOR . '(' atr ';' condicao ';' atr ')' corpo
 
     '('  shift, and go to state 44
 
 
 State 12
 
-   21 funcao: FUNCTION . ID empilha_escopo_func '(' args ')' corpo desempilha_escopo_func
-   22       | FUNCTION . ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func
+   23 funcao: FUNCTION . ID empilha_escopo_func '(' args ')' corpo desempilha_escopo_func
+   24       | FUNCTION . ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func
 
     ID  shift, and go to state 45
 
@@ -506,36 +515,36 @@ State 13
 
 State 14
 
-  101 val: OBJ_VAZIO .
+  104 val: OBJ_VAZIO .
 
-    $default  reduce using rule 101 (val)
+    $default  reduce using rule 104 (val)
 
 
 State 15
 
-  102 val: ARRAY_VAZIO .
+  105 val: ARRAY_VAZIO .
 
-    $default  reduce using rule 102 (val)
+    $default  reduce using rule 105 (val)
 
 
 State 16
 
-  103 val: TRUE .
+  106 val: TRUE .
 
-    $default  reduce using rule 103 (val)
+    $default  reduce using rule 106 (val)
 
 
 State 17
 
-   95 val: '-' . NUM
+   98 val: '-' . NUM
 
     NUM  shift, and go to state 49
 
 
 State 18
 
-   42 atr_obj: '(' . exp ')' '.' prop '=' exp
-   96 val: '(' . exp ')'
+   44 atr_obj: '(' . exp ')' '.' prop '=' exp
+   99 val: '(' . exp ')'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -554,9 +563,9 @@ State 18
 
 State 19
 
-   20 bloco: '{' . empilha_escopo cmds '}' desempilha_escopo
+   22 bloco: '{' . empilha_escopo cmds '}' desempilha_escopo
 
-    $default  reduce using rule 30 (empilha_escopo)
+    $default  reduce using rule 32 (empilha_escopo)
 
     empilha_escopo  go to state 51
 
@@ -579,7 +588,7 @@ State 22
 
     2 cmds: cmd_1 . separador cmds
 
-    $default  reduce using rule 65 (separador)
+    $default  reduce using rule 68 (separador)
 
     separador  go to state 53
 
@@ -639,62 +648,62 @@ State 24
 
 State 25
 
-   19 cmd_2: bloco .
+   21 cmd_2: bloco .
 
-    $default  reduce using rule 19 (cmd_2)
+    $default  reduce using rule 21 (cmd_2)
 
 
 State 26
 
-   13 cmd_1: funcao .
-   18 cmd_2: funcao .
+   15 cmd_1: funcao .
+   20 cmd_2: funcao .
 
-    $end         reduce using rule 13 (cmd_1)
-    $end         [reduce using rule 18 (cmd_2)]
-    NUM          reduce using rule 13 (cmd_1)
-    NUM          [reduce using rule 18 (cmd_2)]
-    ID           reduce using rule 13 (cmd_1)
-    ID           [reduce using rule 18 (cmd_2)]
-    LET          reduce using rule 13 (cmd_1)
-    LET          [reduce using rule 18 (cmd_2)]
-    VAR          reduce using rule 13 (cmd_1)
-    VAR          [reduce using rule 18 (cmd_2)]
-    CONST        reduce using rule 13 (cmd_1)
-    CONST        [reduce using rule 18 (cmd_2)]
-    OBJ          reduce using rule 13 (cmd_1)
-    OBJ          [reduce using rule 18 (cmd_2)]
-    ARRAY        reduce using rule 13 (cmd_1)
-    ARRAY        [reduce using rule 18 (cmd_2)]
-    STRING       reduce using rule 13 (cmd_1)
-    STRING       [reduce using rule 18 (cmd_2)]
-    IF           reduce using rule 13 (cmd_1)
-    IF           [reduce using rule 18 (cmd_2)]
-    ELSE         reduce using rule 18 (cmd_2)
-    WHILE        reduce using rule 13 (cmd_1)
-    WHILE        [reduce using rule 18 (cmd_2)]
-    FOR          reduce using rule 13 (cmd_1)
-    FOR          [reduce using rule 18 (cmd_2)]
-    FUNCTION     reduce using rule 13 (cmd_1)
-    FUNCTION     [reduce using rule 18 (cmd_2)]
-    RETURN       reduce using rule 13 (cmd_1)
-    RETURN       [reduce using rule 18 (cmd_2)]
-    OBJ_VAZIO    reduce using rule 13 (cmd_1)
-    OBJ_VAZIO    [reduce using rule 18 (cmd_2)]
-    ARRAY_VAZIO  reduce using rule 13 (cmd_1)
-    ARRAY_VAZIO  [reduce using rule 18 (cmd_2)]
-    TRUE         reduce using rule 13 (cmd_1)
-    TRUE         [reduce using rule 18 (cmd_2)]
-    '-'          reduce using rule 13 (cmd_1)
-    '-'          [reduce using rule 18 (cmd_2)]
-    '('          reduce using rule 13 (cmd_1)
-    '('          [reduce using rule 18 (cmd_2)]
-    '{'          reduce using rule 13 (cmd_1)
-    '{'          [reduce using rule 18 (cmd_2)]
-    '}'          reduce using rule 13 (cmd_1)
-    '}'          [reduce using rule 18 (cmd_2)]
-    ';'          reduce using rule 13 (cmd_1)
-    ';'          [reduce using rule 18 (cmd_2)]
-    $default     reduce using rule 13 (cmd_1)
+    $end         reduce using rule 15 (cmd_1)
+    $end         [reduce using rule 20 (cmd_2)]
+    NUM          reduce using rule 15 (cmd_1)
+    NUM          [reduce using rule 20 (cmd_2)]
+    ID           reduce using rule 15 (cmd_1)
+    ID           [reduce using rule 20 (cmd_2)]
+    LET          reduce using rule 15 (cmd_1)
+    LET          [reduce using rule 20 (cmd_2)]
+    VAR          reduce using rule 15 (cmd_1)
+    VAR          [reduce using rule 20 (cmd_2)]
+    CONST        reduce using rule 15 (cmd_1)
+    CONST        [reduce using rule 20 (cmd_2)]
+    OBJ          reduce using rule 15 (cmd_1)
+    OBJ          [reduce using rule 20 (cmd_2)]
+    ARRAY        reduce using rule 15 (cmd_1)
+    ARRAY        [reduce using rule 20 (cmd_2)]
+    STRING       reduce using rule 15 (cmd_1)
+    STRING       [reduce using rule 20 (cmd_2)]
+    IF           reduce using rule 15 (cmd_1)
+    IF           [reduce using rule 20 (cmd_2)]
+    ELSE         reduce using rule 20 (cmd_2)
+    WHILE        reduce using rule 15 (cmd_1)
+    WHILE        [reduce using rule 20 (cmd_2)]
+    FOR          reduce using rule 15 (cmd_1)
+    FOR          [reduce using rule 20 (cmd_2)]
+    FUNCTION     reduce using rule 15 (cmd_1)
+    FUNCTION     [reduce using rule 20 (cmd_2)]
+    RETURN       reduce using rule 15 (cmd_1)
+    RETURN       [reduce using rule 20 (cmd_2)]
+    OBJ_VAZIO    reduce using rule 15 (cmd_1)
+    OBJ_VAZIO    [reduce using rule 20 (cmd_2)]
+    ARRAY_VAZIO  reduce using rule 15 (cmd_1)
+    ARRAY_VAZIO  [reduce using rule 20 (cmd_2)]
+    TRUE         reduce using rule 15 (cmd_1)
+    TRUE         [reduce using rule 20 (cmd_2)]
+    '-'          reduce using rule 15 (cmd_1)
+    '-'          [reduce using rule 20 (cmd_2)]
+    '('          reduce using rule 15 (cmd_1)
+    '('          [reduce using rule 20 (cmd_2)]
+    '{'          reduce using rule 15 (cmd_1)
+    '{'          [reduce using rule 20 (cmd_2)]
+    '}'          reduce using rule 15 (cmd_1)
+    '}'          [reduce using rule 20 (cmd_2)]
+    ';'          reduce using rule 15 (cmd_1)
+    ';'          [reduce using rule 20 (cmd_2)]
+    $default     reduce using rule 15 (cmd_1)
 
 
 State 27
@@ -706,23 +715,23 @@ State 27
 
 State 28
 
-   32 atr: atr_id .
+   34 atr: atr_id .
 
-    $default  reduce using rule 32 (atr)
+    $default  reduce using rule 34 (atr)
 
 
 State 29
 
-   33 atr: atr_obj .
+   35 atr: atr_obj .
 
-    $default  reduce using rule 33 (atr)
+    $default  reduce using rule 35 (atr)
 
 
 State 30
 
-   34 atr: atr_array .
+   36 atr: atr_array .
 
-    $default  reduce using rule 34 (atr)
+    $default  reduce using rule 36 (atr)
 
 
 State 31
@@ -734,23 +743,23 @@ State 31
 
 State 32
 
-   62 loop: while_loop .
+   65 loop: while_loop .
 
-    $default  reduce using rule 62 (loop)
+    $default  reduce using rule 65 (loop)
 
 
 State 33
 
-   63 loop: for_loop .
+   66 loop: for_loop .
 
-    $default  reduce using rule 63 (loop)
+    $default  reduce using rule 66 (loop)
 
 
 State 34
 
-   17 cmd_2: condicional .
+   19 cmd_2: condicional .
 
-    $default  reduce using rule 17 (cmd_2)
+    $default  reduce using rule 19 (cmd_2)
 
 
 State 35
@@ -758,13 +767,14 @@ State 35
     8 cmd_1: exp . ASM
     9      | exp .
    12      | exp . '(' params ')'
-   45 atr_array: exp . indices '=' rec
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   48 atr_array: exp . indices '=' rec
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
     ASM  shift, and go to state 57
     '+'  shift, and go to state 58
@@ -773,25 +783,26 @@ State 35
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
     '('  shift, and go to state 63
-    '['  shift, and go to state 64
+    '.'  shift, and go to state 64
+    '['  shift, and go to state 65
 
     '-'       [reduce using rule 9 (cmd_1)]
     '('       [reduce using rule 9 (cmd_1)]
     $default  reduce using rule 9 (cmd_1)
 
-    indices  go to state 65
+    indices  go to state 66
 
 
 State 36
 
-   86 exp: val .
+   89 exp: val .
 
-    $default  reduce using rule 86 (exp)
+    $default  reduce using rule 89 (exp)
 
 
 State 37
 
-   37 atr_id: ID ADD . exp
+   39 atr_id: ID ADD . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -804,24 +815,24 @@ State 37
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 66
+    exp  go to state 67
     val  go to state 36
 
 
 State 38
 
-  100 val: ID INC .
+  103 val: ID INC .
 
-    $default  reduce using rule 100 (val)
+    $default  reduce using rule 103 (val)
 
 
 State 39
 
-   35 atr_id: ID '=' . exp
-   36       | ID '=' . atr_recursiva
+   37 atr_id: ID '=' . exp
+   38       | ID '=' . atr_recursiva
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 67
+    ID           shift, and go to state 68
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -831,29 +842,41 @@ State 39
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    atr_recursiva  go to state 68
-    exp            go to state 69
+    atr_recursiva  go to state 69
+    exp            go to state 70
     val            go to state 36
 
 
 State 40
 
-   40 atr_obj: ID '.' . prop '=' exp
-   41        | ID '.' . prop ADD exp
-   85 exp: ID '.' . ID
+   13 cmd_1: ID '.' . ID '(' params ')'
+   14      | ID '.' . ID '.' ID '[' exp ']' '(' params ')'
+   42 atr_obj: ID '.' . prop '=' exp
+   43        | ID '.' . prop ADD exp
 
-    ID  shift, and go to state 70
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 71
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
 
-    prop  go to state 71
+    prop  go to state 72
+    exp   go to state 73
+    val   go to state 36
 
 
 State 41
 
-   46 atr_array: ID '[' . atr ']' '=' exp
-   47          | ID '[' . exp ']' '=' exp
+   49 atr_array: ID '[' . atr ']' '=' exp
+   50          | ID '[' . exp ']' '=' exp
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 2
+    ID           shift, and go to state 74
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -863,21 +886,21 @@ State 41
     '-'          shift, and go to state 17
     '('          shift, and go to state 18
 
-    atr        go to state 72
+    atr        go to state 75
     atr_id     go to state 28
     atr_obj    go to state 29
     atr_array  go to state 30
-    exp        go to state 73
+    exp        go to state 76
     val        go to state 36
 
 
 State 42
 
-   69 condicional: IF '(' . condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' . condicao ')' empilha_escopo corpo desempilha_escopo
+   72 condicional: IF '(' . condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' . condicao ')' empilha_escopo corpo desempilha_escopo
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 74
+    ID           shift, and go to state 77
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -887,18 +910,18 @@ State 42
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    matrix    go to state 75
-    condicao  go to state 76
-    exp       go to state 77
+    matrix    go to state 78
+    condicao  go to state 79
+    exp       go to state 80
     val       go to state 36
 
 
 State 43
 
-   66 while_loop: WHILE '(' . condicao ')' corpo
+   69 while_loop: WHILE '(' . condicao ')' corpo
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 74
+    ID           shift, and go to state 77
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -908,20 +931,20 @@ State 43
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    matrix    go to state 75
-    condicao  go to state 78
-    exp       go to state 77
+    matrix    go to state 78
+    condicao  go to state 81
+    exp       go to state 80
     val       go to state 36
 
 
 State 44
 
-   67 for_loop: FOR '(' . LET decl ';' condicao ';' atr ')' corpo
-   68         | FOR '(' . atr ';' condicao ';' atr ')' corpo
+   70 for_loop: FOR '(' . LET decl ';' condicao ';' atr ')' corpo
+   71         | FOR '(' . atr ';' condicao ';' atr ')' corpo
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    LET          shift, and go to state 79
+    ID           shift, and go to state 74
+    LET          shift, and go to state 82
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -931,40 +954,38 @@ State 44
     '-'          shift, and go to state 17
     '('          shift, and go to state 18
 
-    atr        go to state 80
+    atr        go to state 83
     atr_id     go to state 28
     atr_obj    go to state 29
     atr_array  go to state 30
-    exp        go to state 81
+    exp        go to state 84
     val        go to state 36
 
 
 State 45
 
-   21 funcao: FUNCTION ID . empilha_escopo_func '(' args ')' corpo desempilha_escopo_func
-   22       | FUNCTION ID . empilha_escopo_func '(' ')' corpo desempilha_escopo_func
+   23 funcao: FUNCTION ID . empilha_escopo_func '(' args ')' corpo desempilha_escopo_func
+   24       | FUNCTION ID . empilha_escopo_func '(' ')' corpo desempilha_escopo_func
 
-    $default  reduce using rule 30 (empilha_escopo)
+    $default  reduce using rule 32 (empilha_escopo)
 
-    empilha_escopo_func  go to state 82
-    empilha_escopo       go to state 83
+    empilha_escopo_func  go to state 85
+    empilha_escopo       go to state 86
 
 
 State 46
 
-   85 exp: ID . '.' ID
-   93 val: ID .
-  100    | ID . INC
+   96 val: ID .
+  103    | ID . INC
 
     INC  shift, and go to state 38
-    '.'  shift, and go to state 84
 
-    $default  reduce using rule 93 (val)
+    $default  reduce using rule 96 (val)
 
 
 State 47
 
-   96 val: '(' . exp ')'
+   99 val: '(' . exp ')'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -977,26 +998,28 @@ State 47
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 85
+    exp  go to state 87
     val  go to state 36
 
 
 State 48
 
    11 cmd_1: RETURN exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
     '+'  shift, and go to state 58
     '-'  shift, and go to state 59
     '*'  shift, and go to state 60
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
-    '('  shift, and go to state 86
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
     '-'       [reduce using rule 11 (cmd_1)]
     '('       [reduce using rule 11 (cmd_1)]
@@ -1005,34 +1028,36 @@ State 48
 
 State 49
 
-   95 val: '-' NUM .
+   98 val: '-' NUM .
 
-    $default  reduce using rule 95 (val)
+    $default  reduce using rule 98 (val)
 
 
 State 50
 
-   42 atr_obj: '(' exp . ')' '.' prop '=' exp
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-   96 val: '(' exp . ')'
+   44 atr_obj: '(' exp . ')' '.' prop '=' exp
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+   99 val: '(' exp . ')'
 
     '+'  shift, and go to state 58
     '-'  shift, and go to state 59
     '*'  shift, and go to state 60
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    ')'  shift, and go to state 87
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    ')'  shift, and go to state 89
 
 
 State 51
 
-   20 bloco: '{' empilha_escopo . cmds '}' desempilha_escopo
+   22 bloco: '{' empilha_escopo . cmds '}' desempilha_escopo
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 2
@@ -1056,7 +1081,7 @@ State 51
 
     $default  reduce using rule 4 (cmds)
 
-    cmds         go to state 88
+    cmds         go to state 90
     cmd_1        go to state 22
     tipo_var     go to state 23
     cmd_2        go to state 24
@@ -1084,7 +1109,7 @@ State 52
 State 53
 
     2 cmds: cmd_1 separador . cmds
-   64 separador: separador . ';'
+   67 separador: separador . ';'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 2
@@ -1105,11 +1130,11 @@ State 53
     '-'          shift, and go to state 17
     '('          shift, and go to state 18
     '{'          shift, and go to state 19
-    ';'          shift, and go to state 89
+    ';'          shift, and go to state 91
 
     $default  reduce using rule 4 (cmds)
 
-    cmds         go to state 90
+    cmds         go to state 92
     cmd_1        go to state 22
     tipo_var     go to state 23
     cmd_2        go to state 24
@@ -1129,15 +1154,15 @@ State 53
 
 State 54
 
-   58 decl: ID . '=' exp fim_decl
-   59     | ID . fim_decl
+   61 decl: ID . '=' exp fim_decl
+   62     | ID . fim_decl
 
-    '='  shift, and go to state 91
-    ','  shift, and go to state 92
+    '='  shift, and go to state 93
+    ','  shift, and go to state 94
 
-    $default  reduce using rule 61 (fim_decl)
+    $default  reduce using rule 64 (fim_decl)
 
-    fim_decl  go to state 93
+    fim_decl  go to state 95
 
 
 State 55
@@ -1163,45 +1188,7 @@ State 57
 
 State 58
 
-   80 exp: exp '+' . exp
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 94
-    val  go to state 36
-
-
-State 59
-
-   81 exp: exp '-' . exp
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 95
-    val  go to state 36
-
-
-State 60
-
-   82 exp: exp '*' . exp
+   83 exp: exp '+' . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -1218,9 +1205,9 @@ State 60
     val  go to state 36
 
 
-State 61
+State 59
 
-   83 exp: exp '/' . exp
+   84 exp: exp '-' . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -1237,9 +1224,9 @@ State 61
     val  go to state 36
 
 
-State 62
+State 60
 
-   84 exp: exp '%' . exp
+   85 exp: exp '*' . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -1256,34 +1243,9 @@ State 62
     val  go to state 36
 
 
-State 63
+State 61
 
-   12 cmd_1: exp '(' . params ')'
-   87 exp: exp '(' . params ')'
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 99
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    $default  reduce using rule 90 (params)
-
-    exp     go to state 100
-    params  go to state 101
-    param   go to state 102
-    val     go to state 36
-
-
-State 64
-
-   56 indices: '[' . exp ']' indices
-   57        | '[' . exp ']'
+   86 exp: exp '/' . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -1296,281 +1258,16 @@ State 64
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 103
+    exp  go to state 99
     val  go to state 36
 
 
-State 65
+State 62
 
-   45 atr_array: exp indices . '=' rec
-
-    '='  shift, and go to state 104
-
-
-State 66
-
-   37 atr_id: ID ADD exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 37 (atr_id)
-
-
-State 67
-
-   38 atr_recursiva: ID . '=' exp
-   39              | ID . '=' atr_recursiva
-   85 exp: ID . '.' ID
-   93 val: ID .
-  100    | ID . INC
-
-    INC  shift, and go to state 38
-    '='  shift, and go to state 105
-    '.'  shift, and go to state 84
-
-    $default  reduce using rule 93 (val)
-
-
-State 68
-
-   36 atr_id: ID '=' atr_recursiva .
-
-    $default  reduce using rule 36 (atr_id)
-
-
-State 69
-
-   35 atr_id: ID '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 35 (atr_id)
-
-
-State 70
-
-   43 prop: ID .
-   44     | ID . '[' exp ']'
-   85 exp: ID '.' ID .
-
-    '['  shift, and go to state 106
-
-    ADD       reduce using rule 43 (prop)
-    '='       reduce using rule 43 (prop)
-    '['       [reduce using rule 85 (exp)]
-    $default  reduce using rule 85 (exp)
-
-
-State 71
-
-   40 atr_obj: ID '.' prop . '=' exp
-   41        | ID '.' prop . ADD exp
-
-    ADD  shift, and go to state 107
-    '='  shift, and go to state 108
-
-
-State 72
-
-   46 atr_array: ID '[' atr . ']' '=' exp
-
-    ']'  shift, and go to state 109
-
-
-State 73
-
-   45 atr_array: exp . indices '=' rec
-   47          | ID '[' exp . ']' '=' exp
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    '['  shift, and go to state 64
-    ']'  shift, and go to state 110
-
-    indices  go to state 65
-
-
-State 74
-
-   55 matrix: ID . indices
-   85 exp: ID . '.' ID
-   93 val: ID .
-  100    | ID . INC
-
-    INC  shift, and go to state 38
-    '.'  shift, and go to state 84
-    '['  shift, and go to state 64
-
-    $default  reduce using rule 93 (val)
-
-    indices  go to state 111
-
-
-State 75
-
-   79 condicao: matrix .
-
-    $default  reduce using rule 79 (condicao)
-
-
-State 76
-
-   69 condicional: IF '(' condicao . ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' condicao . ')' empilha_escopo corpo desempilha_escopo
-
-    ')'  shift, and go to state 112
-
-
-State 77
-
-   74 condicao: exp . '>' exp
-   75         | exp . '<' exp
-   76         | exp . IGUAL exp
-   77         | exp . DIF exp
-   78         | exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    IGUAL  shift, and go to state 113
-    DIF    shift, and go to state 114
-    '+'    shift, and go to state 58
-    '-'    shift, and go to state 59
-    '*'    shift, and go to state 60
-    '/'    shift, and go to state 61
-    '%'    shift, and go to state 62
-    '('    shift, and go to state 86
-    '>'    shift, and go to state 115
-    '<'    shift, and go to state 116
-
-    $default  reduce using rule 78 (condicao)
-
-
-State 78
-
-   66 while_loop: WHILE '(' condicao . ')' corpo
-
-    ')'  shift, and go to state 117
-
-
-State 79
-
-   67 for_loop: FOR '(' LET . decl ';' condicao ';' atr ')' corpo
-
-    ID  shift, and go to state 54
-
-    decl  go to state 118
-
-
-State 80
-
-   68 for_loop: FOR '(' atr . ';' condicao ';' atr ')' corpo
-
-    ';'  shift, and go to state 119
-
-
-State 81
-
-   45 atr_array: exp . indices '=' rec
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    '['  shift, and go to state 64
-
-    indices  go to state 65
-
-
-State 82
-
-   21 funcao: FUNCTION ID empilha_escopo_func . '(' args ')' corpo desempilha_escopo_func
-   22       | FUNCTION ID empilha_escopo_func . '(' ')' corpo desempilha_escopo_func
-
-    '('  shift, and go to state 120
-
-
-State 83
-
-   28 empilha_escopo_func: empilha_escopo .
-
-    $default  reduce using rule 28 (empilha_escopo_func)
-
-
-State 84
-
-   85 exp: ID '.' . ID
-
-    ID  shift, and go to state 121
-
-
-State 85
-
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-   96 val: '(' exp . ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    ')'  shift, and go to state 122
-
-
-State 86
-
-   87 exp: exp '(' . params ')'
+   87 exp: exp '%' . exp
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 99
+    ID           shift, and go to state 46
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -1580,48 +1277,447 @@ State 86
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    $default  reduce using rule 90 (params)
+    exp  go to state 100
+    val  go to state 36
 
-    exp     go to state 100
-    params  go to state 123
-    param   go to state 102
+
+State 63
+
+   12 cmd_1: exp '(' . params ')'
+   90 exp: exp '(' . params ')'
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 101
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    $default  reduce using rule 93 (params)
+
+    exp     go to state 102
+    params  go to state 103
+    param   go to state 104
     val     go to state 36
 
 
-State 87
+State 64
 
-   42 atr_obj: '(' exp ')' . '.' prop '=' exp
-   96 val: '(' exp ')' .
+   88 exp: exp '.' . exp
 
-    '.'  shift, and go to state 124
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 105
+    val  go to state 36
+
+
+State 65
+
+   59 indices: '[' . exp ']' indices
+   60        | '[' . exp ']'
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 106
+    val  go to state 36
+
+
+State 66
+
+   48 atr_array: exp indices . '=' rec
+
+    '='  shift, and go to state 107
+
+
+State 67
+
+   39 atr_id: ID ADD exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 39 (atr_id)
+
+
+State 68
+
+   40 atr_recursiva: ID . '=' exp
+   41              | ID . '=' atr_recursiva
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '='  shift, and go to state 108
 
     $default  reduce using rule 96 (val)
 
 
+State 69
+
+   38 atr_id: ID '=' atr_recursiva .
+
+    $default  reduce using rule 38 (atr_id)
+
+
+State 70
+
+   37 atr_id: ID '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 37 (atr_id)
+
+
+State 71
+
+   13 cmd_1: ID '.' ID . '(' params ')'
+   14      | ID '.' ID . '.' ID '[' exp ']' '(' params ')'
+   46 prop: ID . '.' prop
+   47     | ID . '[' exp ']'
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '('  shift, and go to state 109
+    '.'  shift, and go to state 110
+    '['  shift, and go to state 111
+
+    '('       [reduce using rule 96 (val)]
+    '.'       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
+
+
+State 72
+
+   42 atr_obj: ID '.' prop . '=' exp
+   43        | ID '.' prop . ADD exp
+
+    ADD  shift, and go to state 112
+    '='  shift, and go to state 113
+
+
+State 73
+
+   45 prop: exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 45 (prop)
+
+
+State 74
+
+   37 atr_id: ID . '=' exp
+   38       | ID . '=' atr_recursiva
+   39       | ID . ADD exp
+   42 atr_obj: ID . '.' prop '=' exp
+   43        | ID . '.' prop ADD exp
+   49 atr_array: ID . '[' atr ']' '=' exp
+   50          | ID . '[' exp ']' '=' exp
+   96 val: ID .
+  103    | ID . INC
+
+    ADD  shift, and go to state 37
+    INC  shift, and go to state 38
+    '='  shift, and go to state 39
+    '.'  shift, and go to state 114
+    '['  shift, and go to state 41
+
+    '.'       [reduce using rule 96 (val)]
+    '['       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
+
+
+State 75
+
+   49 atr_array: ID '[' atr . ']' '=' exp
+
+    ']'  shift, and go to state 115
+
+
+State 76
+
+   48 atr_array: exp . indices '=' rec
+   50          | ID '[' exp . ']' '=' exp
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    '['  shift, and go to state 65
+    ']'  shift, and go to state 116
+
+    indices  go to state 66
+
+
+State 77
+
+   58 matrix: ID . indices
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '['  shift, and go to state 65
+
+    $default  reduce using rule 96 (val)
+
+    indices  go to state 117
+
+
+State 78
+
+   82 condicao: matrix .
+
+    $default  reduce using rule 82 (condicao)
+
+
+State 79
+
+   72 condicional: IF '(' condicao . ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' condicao . ')' empilha_escopo corpo desempilha_escopo
+
+    ')'  shift, and go to state 118
+
+
+State 80
+
+   77 condicao: exp . '>' exp
+   78         | exp . '<' exp
+   79         | exp . IGUAL exp
+   80         | exp . DIF exp
+   81         | exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    IGUAL  shift, and go to state 119
+    DIF    shift, and go to state 120
+    '+'    shift, and go to state 58
+    '-'    shift, and go to state 59
+    '*'    shift, and go to state 60
+    '/'    shift, and go to state 61
+    '%'    shift, and go to state 62
+    '('    shift, and go to state 88
+    '.'    shift, and go to state 64
+    '>'    shift, and go to state 121
+    '<'    shift, and go to state 122
+
+    $default  reduce using rule 81 (condicao)
+
+
+State 81
+
+   69 while_loop: WHILE '(' condicao . ')' corpo
+
+    ')'  shift, and go to state 123
+
+
+State 82
+
+   70 for_loop: FOR '(' LET . decl ';' condicao ';' atr ')' corpo
+
+    ID  shift, and go to state 54
+
+    decl  go to state 124
+
+
+State 83
+
+   71 for_loop: FOR '(' atr . ';' condicao ';' atr ')' corpo
+
+    ';'  shift, and go to state 125
+
+
+State 84
+
+   48 atr_array: exp . indices '=' rec
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    '['  shift, and go to state 65
+
+    indices  go to state 66
+
+
+State 85
+
+   23 funcao: FUNCTION ID empilha_escopo_func . '(' args ')' corpo desempilha_escopo_func
+   24       | FUNCTION ID empilha_escopo_func . '(' ')' corpo desempilha_escopo_func
+
+    '('  shift, and go to state 126
+
+
+State 86
+
+   30 empilha_escopo_func: empilha_escopo .
+
+    $default  reduce using rule 30 (empilha_escopo_func)
+
+
+State 87
+
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+   99 val: '(' exp . ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    ')'  shift, and go to state 127
+
+
 State 88
 
-   20 bloco: '{' empilha_escopo cmds . '}' desempilha_escopo
+   90 exp: exp '(' . params ')'
 
-    '}'  shift, and go to state 125
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 101
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    $default  reduce using rule 93 (params)
+
+    exp     go to state 102
+    params  go to state 128
+    param   go to state 104
+    val     go to state 36
 
 
 State 89
 
-   64 separador: separador ';' .
+   44 atr_obj: '(' exp ')' . '.' prop '=' exp
+   99 val: '(' exp ')' .
 
-    $default  reduce using rule 64 (separador)
+    '.'  shift, and go to state 129
+
+    '.'       [reduce using rule 99 (val)]
+    $default  reduce using rule 99 (val)
 
 
 State 90
+
+   22 bloco: '{' empilha_escopo cmds . '}' desempilha_escopo
+
+    '}'  shift, and go to state 130
+
+
+State 91
+
+   67 separador: separador ';' .
+
+    $default  reduce using rule 67 (separador)
+
+
+State 92
 
     2 cmds: cmd_1 separador cmds .
 
     $default  reduce using rule 2 (cmds)
 
 
-State 91
+State 93
 
-   58 decl: ID '=' . exp fim_decl
+   61 decl: ID '=' . exp fim_decl
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -1634,248 +1730,211 @@ State 91
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 126
+    exp  go to state 131
     val  go to state 36
-
-
-State 92
-
-   60 fim_decl: ',' . decl
-
-    ID  shift, and go to state 54
-
-    decl  go to state 127
-
-
-State 93
-
-   59 decl: ID fim_decl .
-
-    $default  reduce using rule 59 (decl)
 
 
 State 94
 
-   80 exp: exp . '+' exp
-   80    | exp '+' exp .
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   63 fim_decl: ',' . decl
 
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
+    ID  shift, and go to state 54
 
-    $default  reduce using rule 80 (exp)
+    decl  go to state 132
 
 
 State 95
 
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   81    | exp '-' exp .
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   62 decl: ID fim_decl .
 
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 81 (exp)
+    $default  reduce using rule 62 (decl)
 
 
 State 96
 
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   82    | exp '*' exp .
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   83 exp: exp . '+' exp
+   83    | exp '+' exp .
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 82 (exp)
-
-
-State 97
-
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   83    | exp '/' exp .
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '('  shift, and go to state 86
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
     $default  reduce using rule 83 (exp)
 
 
-State 98
+State 97
 
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   84    | exp '%' exp .
-   87    | exp . '(' params ')'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   84    | exp '-' exp .
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
-    '('  shift, and go to state 86
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
     $default  reduce using rule 84 (exp)
 
 
+State 98
+
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   85    | exp '*' exp .
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 85 (exp)
+
+
 State 99
 
-   85 exp: ID . '.' ID
-   92 param: ID . '=' exp
-   93 val: ID .
-  100    | ID . INC
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   86    | exp '/' exp .
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
-    INC  shift, and go to state 38
-    '='  shift, and go to state 128
-    '.'  shift, and go to state 84
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
-    $default  reduce using rule 93 (val)
+    $default  reduce using rule 86 (exp)
 
 
 State 100
 
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-   91 param: exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   87    | exp '%' exp .
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
-    $default  reduce using rule 91 (param)
+    $default  reduce using rule 87 (exp)
 
 
 State 101
 
-   12 cmd_1: exp '(' params . ')'
-   87 exp: exp '(' params . ')'
+   95 param: ID . '=' exp
+   96 val: ID .
+  103    | ID . INC
 
-    ')'  shift, and go to state 129
+    INC  shift, and go to state 38
+    '='  shift, and go to state 133
+
+    $default  reduce using rule 96 (val)
 
 
 State 102
 
-   88 params: param . ',' params
-   89       | param .
-
-    ','  shift, and go to state 130
-
-    $default  reduce using rule 89 (params)
-
-
-State 103
-
-   56 indices: '[' exp . ']' indices
-   57        | '[' exp . ']'
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+   94 param: exp .
 
     '+'  shift, and go to state 58
     '-'  shift, and go to state 59
     '*'  shift, and go to state 60
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    ']'  shift, and go to state 131
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 94 (param)
+
+
+State 103
+
+   12 cmd_1: exp '(' params . ')'
+   90 exp: exp '(' params . ')'
+
+    ')'  shift, and go to state 134
 
 
 State 104
 
-   45 atr_array: exp indices '=' . rec
+   91 params: param . ',' params
+   92       | param .
 
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 132
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
+    ','  shift, and go to state 135
 
-    atr_array  go to state 133
-    rec        go to state 134
-    matexp     go to state 135
-    matrix     go to state 136
-    exp        go to state 137
-    val        go to state 36
+    $default  reduce using rule 92 (params)
 
 
 State 105
 
-   38 atr_recursiva: ID '=' . exp
-   39              | ID '=' . atr_recursiva
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   88    | exp '.' exp .
+   90    | exp . '(' params ')'
 
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 67
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    atr_recursiva  go to state 138
-    exp            go to state 139
-    val            go to state 36
+    $default  reduce using rule 88 (exp)
 
 
 State 106
 
-   44 prop: ID '[' . exp ']'
+   59 indices: '[' exp . ']' indices
+   60        | '[' exp . ']'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 140
-    val  go to state 36
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    ']'  shift, and go to state 136
 
 
 State 107
 
-   41 atr_obj: ID '.' prop ADD . exp
+   48 atr_array: exp indices '=' . rec
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 46
+    ID           shift, and go to state 137
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -1885,16 +1944,21 @@ State 107
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 141
-    val  go to state 36
+    atr_array  go to state 138
+    rec        go to state 139
+    matexp     go to state 140
+    matrix     go to state 141
+    exp        go to state 142
+    val        go to state 36
 
 
 State 108
 
-   40 atr_obj: ID '.' prop '=' . exp
+   40 atr_recursiva: ID '=' . exp
+   41              | ID '=' . atr_recursiva
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 46
+    ID           shift, and go to state 68
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -1904,82 +1968,58 @@ State 108
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 142
-    val  go to state 36
+    atr_recursiva  go to state 143
+    exp            go to state 144
+    val            go to state 36
 
 
 State 109
 
-   46 atr_array: ID '[' atr ']' . '=' exp
+   13 cmd_1: ID '.' ID '(' . params ')'
 
-    '='  shift, and go to state 143
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 101
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    $default  reduce using rule 93 (params)
+
+    exp     go to state 102
+    params  go to state 145
+    param   go to state 104
+    val     go to state 36
 
 
 State 110
 
-   47 atr_array: ID '[' exp ']' . '=' exp
+   14 cmd_1: ID '.' ID '.' . ID '[' exp ']' '(' params ')'
+   46 prop: ID '.' . prop
 
-    '='  shift, and go to state 144
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 146
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    prop  go to state 147
+    exp   go to state 73
+    val   go to state 36
 
 
 State 111
 
-   55 matrix: ID indices .
-
-    $default  reduce using rule 55 (matrix)
-
-
-State 112
-
-   69 condicional: IF '(' condicao ')' . empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' condicao ')' . empilha_escopo corpo desempilha_escopo
-
-    $default  reduce using rule 30 (empilha_escopo)
-
-    empilha_escopo  go to state 145
-
-
-State 113
-
-   76 condicao: exp IGUAL . exp
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 146
-    val  go to state 36
-
-
-State 114
-
-   77 condicao: exp DIF . exp
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 147
-    val  go to state 36
-
-
-State 115
-
-   74 condicao: exp '>' . exp
+   47 prop: ID '[' . exp ']'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -1996,9 +2036,9 @@ State 115
     val  go to state 36
 
 
-State 116
+State 112
 
-   75 condicao: exp '<' . exp
+   43 atr_obj: ID '.' prop ADD . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -2015,9 +2055,156 @@ State 116
     val  go to state 36
 
 
+State 113
+
+   42 atr_obj: ID '.' prop '=' . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 150
+    val  go to state 36
+
+
+State 114
+
+   42 atr_obj: ID '.' . prop '=' exp
+   43        | ID '.' . prop ADD exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 151
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    prop  go to state 72
+    exp   go to state 73
+    val   go to state 36
+
+
+State 115
+
+   49 atr_array: ID '[' atr ']' . '=' exp
+
+    '='  shift, and go to state 152
+
+
+State 116
+
+   50 atr_array: ID '[' exp ']' . '=' exp
+
+    '='  shift, and go to state 153
+
+
 State 117
 
-   66 while_loop: WHILE '(' condicao ')' . corpo
+   58 matrix: ID indices .
+
+    $default  reduce using rule 58 (matrix)
+
+
+State 118
+
+   72 condicional: IF '(' condicao ')' . empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' condicao ')' . empilha_escopo corpo desempilha_escopo
+
+    $default  reduce using rule 32 (empilha_escopo)
+
+    empilha_escopo  go to state 154
+
+
+State 119
+
+   79 condicao: exp IGUAL . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 155
+    val  go to state 36
+
+
+State 120
+
+   80 condicao: exp DIF . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 156
+    val  go to state 36
+
+
+State 121
+
+   77 condicao: exp '>' . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 157
+    val  go to state 36
+
+
+State 122
+
+   78 condicao: exp '<' . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 158
+    val  go to state 36
+
+
+State 123
+
+   69 while_loop: WHILE '(' condicao ')' . corpo
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 2
@@ -2037,11 +2224,11 @@ State 117
     TRUE         shift, and go to state 16
     '-'          shift, and go to state 17
     '('          shift, and go to state 18
-    '{'          shift, and go to state 150
+    '{'          shift, and go to state 159
 
-    cmd_1        go to state 151
+    cmd_1        go to state 160
     tipo_var     go to state 23
-    cmd_2        go to state 152
+    cmd_2        go to state 161
     bloco        go to state 25
     funcao       go to state 26
     atr          go to state 27
@@ -2052,216 +2239,82 @@ State 117
     while_loop   go to state 32
     for_loop     go to state 33
     condicional  go to state 34
-    corpo        go to state 153
+    corpo        go to state 162
     exp          go to state 35
     val          go to state 36
 
 
-State 118
-
-   67 for_loop: FOR '(' LET decl . ';' condicao ';' atr ')' corpo
-
-    ';'  shift, and go to state 154
-
-
-State 119
-
-   68 for_loop: FOR '(' atr ';' . condicao ';' atr ')' corpo
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 74
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    matrix    go to state 75
-    condicao  go to state 155
-    exp       go to state 77
-    val       go to state 36
-
-
-State 120
-
-   21 funcao: FUNCTION ID empilha_escopo_func '(' . args ')' corpo desempilha_escopo_func
-   22       | FUNCTION ID empilha_escopo_func '(' . ')' corpo desempilha_escopo_func
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 156
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-    ')'          shift, and go to state 157
-
-    args  go to state 158
-    arg   go to state 159
-    exp   go to state 160
-    val   go to state 36
-
-
-State 121
-
-   85 exp: ID '.' ID .
-
-    $default  reduce using rule 85 (exp)
-
-
-State 122
-
-   96 val: '(' exp ')' .
-
-    $default  reduce using rule 96 (val)
-
-
-State 123
-
-   87 exp: exp '(' params . ')'
-
-    ')'  shift, and go to state 161
-
-
 State 124
 
-   42 atr_obj: '(' exp ')' '.' . prop '=' exp
+   70 for_loop: FOR '(' LET decl . ';' condicao ';' atr ')' corpo
 
-    ID  shift, and go to state 162
-
-    prop  go to state 163
+    ';'  shift, and go to state 163
 
 
 State 125
 
-   20 bloco: '{' empilha_escopo cmds '}' . desempilha_escopo
+   71 for_loop: FOR '(' atr ';' . condicao ';' atr ')' corpo
 
-    $default  reduce using rule 31 (desempilha_escopo)
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 77
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
 
-    desempilha_escopo  go to state 164
+    matrix    go to state 78
+    condicao  go to state 164
+    exp       go to state 80
+    val       go to state 36
 
 
 State 126
 
-   58 decl: ID '=' exp . fim_decl
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   23 funcao: FUNCTION ID empilha_escopo_func '(' . args ')' corpo desempilha_escopo_func
+   24       | FUNCTION ID empilha_escopo_func '(' . ')' corpo desempilha_escopo_func
 
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    ','  shift, and go to state 92
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 165
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+    ')'          shift, and go to state 166
 
-    '-'       [reduce using rule 61 (fim_decl)]
-    '('       [reduce using rule 61 (fim_decl)]
-    $default  reduce using rule 61 (fim_decl)
-
-    fim_decl  go to state 165
+    args  go to state 167
+    arg   go to state 168
+    exp   go to state 169
+    val   go to state 36
 
 
 State 127
 
-   60 fim_decl: ',' decl .
+   99 val: '(' exp ')' .
 
-    $default  reduce using rule 60 (fim_decl)
+    $default  reduce using rule 99 (val)
 
 
 State 128
 
-   92 param: ID '=' . exp
+   90 exp: exp '(' params . ')'
 
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 166
-    val  go to state 36
+    ')'  shift, and go to state 170
 
 
 State 129
 
-   12 cmd_1: exp '(' params ')' .
-   87 exp: exp '(' params ')' .
-
-    $end         reduce using rule 12 (cmd_1)
-    $end         [reduce using rule 87 (exp)]
-    NUM          reduce using rule 12 (cmd_1)
-    NUM          [reduce using rule 87 (exp)]
-    ID           reduce using rule 12 (cmd_1)
-    ID           [reduce using rule 87 (exp)]
-    LET          reduce using rule 12 (cmd_1)
-    LET          [reduce using rule 87 (exp)]
-    VAR          reduce using rule 12 (cmd_1)
-    VAR          [reduce using rule 87 (exp)]
-    CONST        reduce using rule 12 (cmd_1)
-    CONST        [reduce using rule 87 (exp)]
-    OBJ          reduce using rule 12 (cmd_1)
-    OBJ          [reduce using rule 87 (exp)]
-    ARRAY        reduce using rule 12 (cmd_1)
-    ARRAY        [reduce using rule 87 (exp)]
-    STRING       reduce using rule 12 (cmd_1)
-    STRING       [reduce using rule 87 (exp)]
-    IF           reduce using rule 12 (cmd_1)
-    IF           [reduce using rule 87 (exp)]
-    WHILE        reduce using rule 12 (cmd_1)
-    WHILE        [reduce using rule 87 (exp)]
-    FOR          reduce using rule 12 (cmd_1)
-    FOR          [reduce using rule 87 (exp)]
-    FUNCTION     reduce using rule 12 (cmd_1)
-    FUNCTION     [reduce using rule 87 (exp)]
-    ASM          reduce using rule 87 (exp)
-    RETURN       reduce using rule 12 (cmd_1)
-    RETURN       [reduce using rule 87 (exp)]
-    OBJ_VAZIO    reduce using rule 12 (cmd_1)
-    OBJ_VAZIO    [reduce using rule 87 (exp)]
-    ARRAY_VAZIO  reduce using rule 12 (cmd_1)
-    ARRAY_VAZIO  [reduce using rule 87 (exp)]
-    TRUE         reduce using rule 12 (cmd_1)
-    TRUE         [reduce using rule 87 (exp)]
-    '+'          reduce using rule 87 (exp)
-    '-'          reduce using rule 12 (cmd_1)
-    '-'          [reduce using rule 87 (exp)]
-    '*'          reduce using rule 87 (exp)
-    '/'          reduce using rule 87 (exp)
-    '%'          reduce using rule 87 (exp)
-    '('          reduce using rule 12 (cmd_1)
-    '('          [reduce using rule 87 (exp)]
-    '{'          reduce using rule 12 (cmd_1)
-    '{'          [reduce using rule 87 (exp)]
-    '}'          reduce using rule 12 (cmd_1)
-    '}'          [reduce using rule 87 (exp)]
-    '['          reduce using rule 87 (exp)
-    ';'          reduce using rule 12 (cmd_1)
-    ';'          [reduce using rule 87 (exp)]
-    $default     reduce using rule 12 (cmd_1)
-
-
-State 130
-
-   88 params: param ',' . params
+   44 atr_obj: '(' exp ')' '.' . prop '=' exp
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 99
+    ID           shift, and go to state 151
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -2271,194 +2324,57 @@ State 130
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    $default  reduce using rule 90 (params)
+    prop  go to state 171
+    exp   go to state 73
+    val   go to state 36
 
-    exp     go to state 100
-    params  go to state 167
-    param   go to state 102
-    val     go to state 36
+
+State 130
+
+   22 bloco: '{' empilha_escopo cmds '}' . desempilha_escopo
+
+    $default  reduce using rule 33 (desempilha_escopo)
+
+    desempilha_escopo  go to state 172
 
 
 State 131
 
-   56 indices: '[' exp ']' . indices
-   57        | '[' exp ']' .
+   61 decl: ID '=' exp . fim_decl
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
-    '['  shift, and go to state 64
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    ','  shift, and go to state 94
 
-    $default  reduce using rule 57 (indices)
+    '-'       [reduce using rule 64 (fim_decl)]
+    '('       [reduce using rule 64 (fim_decl)]
+    $default  reduce using rule 64 (fim_decl)
 
-    indices  go to state 168
+    fim_decl  go to state 173
 
 
 State 132
 
-   46 atr_array: ID . '[' atr ']' '=' exp
-   47          | ID . '[' exp ']' '=' exp
-   55 matrix: ID . indices
-   85 exp: ID . '.' ID
-   93 val: ID .
-  100    | ID . INC
+   63 fim_decl: ',' decl .
 
-    INC  shift, and go to state 38
-    '.'  shift, and go to state 84
-    '['  shift, and go to state 169
-
-    '['       [reduce using rule 93 (val)]
-    $default  reduce using rule 93 (val)
-
-    indices  go to state 111
+    $default  reduce using rule 63 (fim_decl)
 
 
 State 133
 
-   51 rec: atr_array .
-
-    $default  reduce using rule 51 (rec)
-
-
-State 134
-
-   45 atr_array: exp indices '=' rec .
-
-    $default  reduce using rule 45 (atr_array)
-
-
-State 135
-
-   49 rec: matexp .
-   53 matexp: matexp . '*' matexp
-   54       | matexp . '+' matexp
-
-    '+'  shift, and go to state 170
-    '*'  shift, and go to state 171
-
-    $default  reduce using rule 49 (rec)
-
-
-State 136
-
-   52 matexp: matrix .
-
-    $default  reduce using rule 52 (matexp)
-
-
-State 137
-
-   45 atr_array: exp . indices '=' rec
-   48 rec: exp .
-   50    | exp . '=' rec
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '='  shift, and go to state 172
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    '['  shift, and go to state 64
-
-    '-'       [reduce using rule 48 (rec)]
-    '('       [reduce using rule 48 (rec)]
-    $default  reduce using rule 48 (rec)
-
-    indices  go to state 65
-
-
-State 138
-
-   39 atr_recursiva: ID '=' atr_recursiva .
-
-    $default  reduce using rule 39 (atr_recursiva)
-
-
-State 139
-
-   38 atr_recursiva: ID '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 38 (atr_recursiva)
-
-
-State 140
-
-   44 prop: ID '[' exp . ']'
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    ']'  shift, and go to state 173
-
-
-State 141
-
-   41 atr_obj: ID '.' prop ADD exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 41 (atr_obj)
-
-
-State 142
-
-   40 atr_obj: ID '.' prop '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 40 (atr_obj)
-
-
-State 143
-
-   46 atr_array: ID '[' atr ']' '=' . exp
+   95 param: ID '=' . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -2475,9 +2391,321 @@ State 143
     val  go to state 36
 
 
+State 134
+
+   12 cmd_1: exp '(' params ')' .
+   90 exp: exp '(' params ')' .
+
+    $end         reduce using rule 12 (cmd_1)
+    $end         [reduce using rule 90 (exp)]
+    NUM          reduce using rule 12 (cmd_1)
+    NUM          [reduce using rule 90 (exp)]
+    ID           reduce using rule 12 (cmd_1)
+    ID           [reduce using rule 90 (exp)]
+    LET          reduce using rule 12 (cmd_1)
+    LET          [reduce using rule 90 (exp)]
+    VAR          reduce using rule 12 (cmd_1)
+    VAR          [reduce using rule 90 (exp)]
+    CONST        reduce using rule 12 (cmd_1)
+    CONST        [reduce using rule 90 (exp)]
+    OBJ          reduce using rule 12 (cmd_1)
+    OBJ          [reduce using rule 90 (exp)]
+    ARRAY        reduce using rule 12 (cmd_1)
+    ARRAY        [reduce using rule 90 (exp)]
+    STRING       reduce using rule 12 (cmd_1)
+    STRING       [reduce using rule 90 (exp)]
+    IF           reduce using rule 12 (cmd_1)
+    IF           [reduce using rule 90 (exp)]
+    WHILE        reduce using rule 12 (cmd_1)
+    WHILE        [reduce using rule 90 (exp)]
+    FOR          reduce using rule 12 (cmd_1)
+    FOR          [reduce using rule 90 (exp)]
+    FUNCTION     reduce using rule 12 (cmd_1)
+    FUNCTION     [reduce using rule 90 (exp)]
+    ASM          reduce using rule 90 (exp)
+    RETURN       reduce using rule 12 (cmd_1)
+    RETURN       [reduce using rule 90 (exp)]
+    OBJ_VAZIO    reduce using rule 12 (cmd_1)
+    OBJ_VAZIO    [reduce using rule 90 (exp)]
+    ARRAY_VAZIO  reduce using rule 12 (cmd_1)
+    ARRAY_VAZIO  [reduce using rule 90 (exp)]
+    TRUE         reduce using rule 12 (cmd_1)
+    TRUE         [reduce using rule 90 (exp)]
+    '+'          reduce using rule 90 (exp)
+    '-'          reduce using rule 12 (cmd_1)
+    '-'          [reduce using rule 90 (exp)]
+    '*'          reduce using rule 90 (exp)
+    '/'          reduce using rule 90 (exp)
+    '%'          reduce using rule 90 (exp)
+    '('          reduce using rule 12 (cmd_1)
+    '('          [reduce using rule 90 (exp)]
+    '.'          reduce using rule 90 (exp)
+    '['          reduce using rule 90 (exp)
+    '{'          reduce using rule 12 (cmd_1)
+    '{'          [reduce using rule 90 (exp)]
+    '}'          reduce using rule 12 (cmd_1)
+    '}'          [reduce using rule 90 (exp)]
+    ';'          reduce using rule 12 (cmd_1)
+    ';'          [reduce using rule 90 (exp)]
+    $default     reduce using rule 12 (cmd_1)
+
+
+State 135
+
+   91 params: param ',' . params
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 101
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    $default  reduce using rule 93 (params)
+
+    exp     go to state 102
+    params  go to state 175
+    param   go to state 104
+    val     go to state 36
+
+
+State 136
+
+   59 indices: '[' exp ']' . indices
+   60        | '[' exp ']' .
+
+    '['  shift, and go to state 65
+
+    $default  reduce using rule 60 (indices)
+
+    indices  go to state 176
+
+
+State 137
+
+   49 atr_array: ID . '[' atr ']' '=' exp
+   50          | ID . '[' exp ']' '=' exp
+   58 matrix: ID . indices
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '['  shift, and go to state 177
+
+    '['       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
+
+    indices  go to state 117
+
+
+State 138
+
+   54 rec: atr_array .
+
+    $default  reduce using rule 54 (rec)
+
+
+State 139
+
+   48 atr_array: exp indices '=' rec .
+
+    $default  reduce using rule 48 (atr_array)
+
+
+State 140
+
+   52 rec: matexp .
+   56 matexp: matexp . '*' matexp
+   57       | matexp . '+' matexp
+
+    '+'  shift, and go to state 178
+    '*'  shift, and go to state 179
+
+    $default  reduce using rule 52 (rec)
+
+
+State 141
+
+   55 matexp: matrix .
+
+    $default  reduce using rule 55 (matexp)
+
+
+State 142
+
+   48 atr_array: exp . indices '=' rec
+   51 rec: exp .
+   53    | exp . '=' rec
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '='  shift, and go to state 180
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    '['  shift, and go to state 65
+
+    '-'       [reduce using rule 51 (rec)]
+    '('       [reduce using rule 51 (rec)]
+    $default  reduce using rule 51 (rec)
+
+    indices  go to state 66
+
+
+State 143
+
+   41 atr_recursiva: ID '=' atr_recursiva .
+
+    $default  reduce using rule 41 (atr_recursiva)
+
+
 State 144
 
-   47 atr_array: ID '[' exp ']' '=' . exp
+   40 atr_recursiva: ID '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 40 (atr_recursiva)
+
+
+State 145
+
+   13 cmd_1: ID '.' ID '(' params . ')'
+
+    ')'  shift, and go to state 181
+
+
+State 146
+
+   14 cmd_1: ID '.' ID '.' ID . '[' exp ']' '(' params ')'
+   46 prop: ID . '.' prop
+   47     | ID . '[' exp ']'
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '.'  shift, and go to state 182
+    '['  shift, and go to state 183
+
+    '.'       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
+
+
+State 147
+
+   46 prop: ID '.' prop .
+
+    $default  reduce using rule 46 (prop)
+
+
+State 148
+
+   47 prop: ID '[' exp . ']'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    ']'  shift, and go to state 184
+
+
+State 149
+
+   43 atr_obj: ID '.' prop ADD exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 43 (atr_obj)
+
+
+State 150
+
+   42 atr_obj: ID '.' prop '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 42 (atr_obj)
+
+
+State 151
+
+   46 prop: ID . '.' prop
+   47     | ID . '[' exp ']'
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '.'  shift, and go to state 182
+    '['  shift, and go to state 111
+
+    '.'       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
+
+
+State 152
+
+   49 atr_array: ID '[' atr ']' '=' . exp
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -2490,14 +2718,33 @@ State 144
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 175
+    exp  go to state 185
     val  go to state 36
 
 
-State 145
+State 153
 
-   69 condicional: IF '(' condicao ')' empilha_escopo . corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' condicao ')' empilha_escopo . corpo desempilha_escopo
+   50 atr_array: ID '[' exp ']' '=' . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 186
+    val  go to state 36
+
+
+State 154
+
+   72 condicional: IF '(' condicao ')' empilha_escopo . corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' condicao ')' empilha_escopo . corpo desempilha_escopo
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 2
@@ -2517,11 +2764,11 @@ State 145
     TRUE         shift, and go to state 16
     '-'          shift, and go to state 17
     '('          shift, and go to state 18
-    '{'          shift, and go to state 150
+    '{'          shift, and go to state 159
 
-    cmd_1        go to state 151
+    cmd_1        go to state 160
     tipo_var     go to state 23
-    cmd_2        go to state 152
+    cmd_2        go to state 161
     bloco        go to state 25
     funcao       go to state 26
     atr          go to state 27
@@ -2532,95 +2779,103 @@ State 145
     while_loop   go to state 32
     for_loop     go to state 33
     condicional  go to state 34
-    corpo        go to state 176
+    corpo        go to state 187
     exp          go to state 35
     val          go to state 36
 
 
-State 146
+State 155
 
-   76 condicao: exp IGUAL exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 76 (condicao)
-
-
-State 147
-
-   77 condicao: exp DIF exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   79 condicao: exp IGUAL exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
     '+'  shift, and go to state 58
     '-'  shift, and go to state 59
     '*'  shift, and go to state 60
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
-    '('  shift, and go to state 86
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 79 (condicao)
+
+
+State 156
+
+   80 condicao: exp DIF exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 80 (condicao)
+
+
+State 157
+
+   77 condicao: exp '>' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
     $default  reduce using rule 77 (condicao)
 
 
-State 148
+State 158
 
-   74 condicao: exp '>' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 74 (condicao)
-
-
-State 149
-
-   75 condicao: exp '<' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   78 condicao: exp '<' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
     '+'  shift, and go to state 58
     '-'  shift, and go to state 59
     '*'  shift, and go to state 60
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
-    '('  shift, and go to state 86
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
-    $default  reduce using rule 75 (condicao)
+    $default  reduce using rule 78 (condicao)
 
 
-State 150
+State 159
 
-   20 bloco: '{' . empilha_escopo cmds '}' desempilha_escopo
-   71 corpo: '{' . cmds '}'
+   22 bloco: '{' . empilha_escopo cmds '}' desempilha_escopo
+   74 corpo: '{' . cmds '}'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 2
@@ -2642,30 +2897,30 @@ State 150
     '('          shift, and go to state 18
     '{'          shift, and go to state 19
 
-    NUM          [reduce using rule 30 (empilha_escopo)]
-    ID           [reduce using rule 30 (empilha_escopo)]
-    LET          [reduce using rule 30 (empilha_escopo)]
-    VAR          [reduce using rule 30 (empilha_escopo)]
-    CONST        [reduce using rule 30 (empilha_escopo)]
-    OBJ          [reduce using rule 30 (empilha_escopo)]
-    ARRAY        [reduce using rule 30 (empilha_escopo)]
-    STRING       [reduce using rule 30 (empilha_escopo)]
-    IF           [reduce using rule 30 (empilha_escopo)]
-    WHILE        [reduce using rule 30 (empilha_escopo)]
-    FOR          [reduce using rule 30 (empilha_escopo)]
-    FUNCTION     [reduce using rule 30 (empilha_escopo)]
-    RETURN       [reduce using rule 30 (empilha_escopo)]
-    OBJ_VAZIO    [reduce using rule 30 (empilha_escopo)]
-    ARRAY_VAZIO  [reduce using rule 30 (empilha_escopo)]
-    TRUE         [reduce using rule 30 (empilha_escopo)]
-    '-'          [reduce using rule 30 (empilha_escopo)]
-    '('          [reduce using rule 30 (empilha_escopo)]
-    '{'          [reduce using rule 30 (empilha_escopo)]
+    NUM          [reduce using rule 32 (empilha_escopo)]
+    ID           [reduce using rule 32 (empilha_escopo)]
+    LET          [reduce using rule 32 (empilha_escopo)]
+    VAR          [reduce using rule 32 (empilha_escopo)]
+    CONST        [reduce using rule 32 (empilha_escopo)]
+    OBJ          [reduce using rule 32 (empilha_escopo)]
+    ARRAY        [reduce using rule 32 (empilha_escopo)]
+    STRING       [reduce using rule 32 (empilha_escopo)]
+    IF           [reduce using rule 32 (empilha_escopo)]
+    WHILE        [reduce using rule 32 (empilha_escopo)]
+    FOR          [reduce using rule 32 (empilha_escopo)]
+    FUNCTION     [reduce using rule 32 (empilha_escopo)]
+    RETURN       [reduce using rule 32 (empilha_escopo)]
+    OBJ_VAZIO    [reduce using rule 32 (empilha_escopo)]
+    ARRAY_VAZIO  [reduce using rule 32 (empilha_escopo)]
+    TRUE         [reduce using rule 32 (empilha_escopo)]
+    '-'          [reduce using rule 32 (empilha_escopo)]
+    '('          [reduce using rule 32 (empilha_escopo)]
+    '{'          [reduce using rule 32 (empilha_escopo)]
     '}'          reduce using rule 4 (cmds)
-    '}'          [reduce using rule 30 (empilha_escopo)]
+    '}'          [reduce using rule 32 (empilha_escopo)]
     $default     reduce using rule 4 (cmds)
 
-    cmds            go to state 177
+    cmds            go to state 188
     cmd_1           go to state 22
     tipo_var        go to state 23
     cmd_2           go to state 24
@@ -2684,30 +2939,222 @@ State 150
     val             go to state 36
 
 
-State 151
+State 160
 
-   72 corpo: cmd_1 . ';'
+   75 corpo: cmd_1 . ';'
 
-    ';'  shift, and go to state 178
-
-
-State 152
-
-   73 corpo: cmd_2 .
-
-    $default  reduce using rule 73 (corpo)
+    ';'  shift, and go to state 189
 
 
-State 153
+State 161
 
-   66 while_loop: WHILE '(' condicao ')' corpo .
+   76 corpo: cmd_2 .
 
-    $default  reduce using rule 66 (while_loop)
+    $default  reduce using rule 76 (corpo)
 
 
-State 154
+State 162
 
-   67 for_loop: FOR '(' LET decl ';' . condicao ';' atr ')' corpo
+   69 while_loop: WHILE '(' condicao ')' corpo .
+
+    $default  reduce using rule 69 (while_loop)
+
+
+State 163
+
+   70 for_loop: FOR '(' LET decl ';' . condicao ';' atr ')' corpo
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 77
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    matrix    go to state 78
+    condicao  go to state 190
+    exp       go to state 80
+    val       go to state 36
+
+
+State 164
+
+   71 for_loop: FOR '(' atr ';' condicao . ';' atr ')' corpo
+
+    ';'  shift, and go to state 191
+
+
+State 165
+
+   27 arg: ID .
+   28    | ID . '=' exp
+   96 val: ID .
+  103    | ID . INC
+
+    INC  shift, and go to state 38
+    '='  shift, and go to state 192
+
+    ')'       reduce using rule 27 (arg)
+    ')'       [reduce using rule 96 (val)]
+    ','       reduce using rule 27 (arg)
+    ','       [reduce using rule 96 (val)]
+    $default  reduce using rule 96 (val)
+
+
+State 166
+
+   24 funcao: FUNCTION ID empilha_escopo_func '(' ')' . corpo desempilha_escopo_func
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 2
+    LET          shift, and go to state 3
+    VAR          shift, and go to state 4
+    CONST        shift, and go to state 5
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    IF           shift, and go to state 9
+    WHILE        shift, and go to state 10
+    FOR          shift, and go to state 11
+    FUNCTION     shift, and go to state 12
+    RETURN       shift, and go to state 13
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 18
+    '{'          shift, and go to state 159
+
+    cmd_1        go to state 160
+    tipo_var     go to state 23
+    cmd_2        go to state 161
+    bloco        go to state 25
+    funcao       go to state 26
+    atr          go to state 27
+    atr_id       go to state 28
+    atr_obj      go to state 29
+    atr_array    go to state 30
+    loop         go to state 31
+    while_loop   go to state 32
+    for_loop     go to state 33
+    condicional  go to state 34
+    corpo        go to state 193
+    exp          go to state 35
+    val          go to state 36
+
+
+State 167
+
+   23 funcao: FUNCTION ID empilha_escopo_func '(' args . ')' corpo desempilha_escopo_func
+   25 args: args . ',' arg
+
+    ')'  shift, and go to state 194
+    ','  shift, and go to state 195
+
+
+State 168
+
+   26 args: arg .
+
+    $default  reduce using rule 26 (args)
+
+
+State 169
+
+   29 arg: exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 29 (arg)
+
+
+State 170
+
+   90 exp: exp '(' params ')' .
+
+    $default  reduce using rule 90 (exp)
+
+
+State 171
+
+   44 atr_obj: '(' exp ')' '.' prop . '=' exp
+
+    '='  shift, and go to state 196
+
+
+State 172
+
+   22 bloco: '{' empilha_escopo cmds '}' desempilha_escopo .
+
+    $default  reduce using rule 22 (bloco)
+
+
+State 173
+
+   61 decl: ID '=' exp fim_decl .
+
+    $default  reduce using rule 61 (decl)
+
+
+State 174
+
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+   95 param: ID '=' exp .
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 95 (param)
+
+
+State 175
+
+   91 params: param ',' params .
+
+    $default  reduce using rule 91 (params)
+
+
+State 176
+
+   59 indices: '[' exp ']' indices .
+
+    $default  reduce using rule 59 (indices)
+
+
+State 177
+
+   49 atr_array: ID '[' . atr ']' '=' exp
+   50          | ID '[' . exp ']' '=' exp
+   59 indices: '[' . exp ']' indices
+   60        | '[' . exp ']'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 74
@@ -2718,343 +3165,42 @@ State 154
     ARRAY_VAZIO  shift, and go to state 15
     TRUE         shift, and go to state 16
     '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    matrix    go to state 75
-    condicao  go to state 179
-    exp       go to state 77
-    val       go to state 36
-
-
-State 155
-
-   68 for_loop: FOR '(' atr ';' condicao . ';' atr ')' corpo
-
-    ';'  shift, and go to state 180
-
-
-State 156
-
-   25 arg: ID .
-   26    | ID . '=' exp
-   85 exp: ID . '.' ID
-   93 val: ID .
-  100    | ID . INC
-
-    INC  shift, and go to state 38
-    '='  shift, and go to state 181
-    '.'  shift, and go to state 84
-
-    ')'       reduce using rule 25 (arg)
-    ')'       [reduce using rule 93 (val)]
-    ','       reduce using rule 25 (arg)
-    ','       [reduce using rule 93 (val)]
-    $default  reduce using rule 93 (val)
-
-
-State 157
-
-   22 funcao: FUNCTION ID empilha_escopo_func '(' ')' . corpo desempilha_escopo_func
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    LET          shift, and go to state 3
-    VAR          shift, and go to state 4
-    CONST        shift, and go to state 5
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    IF           shift, and go to state 9
-    WHILE        shift, and go to state 10
-    FOR          shift, and go to state 11
-    FUNCTION     shift, and go to state 12
-    RETURN       shift, and go to state 13
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 18
-    '{'          shift, and go to state 150
-
-    cmd_1        go to state 151
-    tipo_var     go to state 23
-    cmd_2        go to state 152
-    bloco        go to state 25
-    funcao       go to state 26
-    atr          go to state 27
-    atr_id       go to state 28
-    atr_obj      go to state 29
-    atr_array    go to state 30
-    loop         go to state 31
-    while_loop   go to state 32
-    for_loop     go to state 33
-    condicional  go to state 34
-    corpo        go to state 182
-    exp          go to state 35
-    val          go to state 36
-
-
-State 158
-
-   21 funcao: FUNCTION ID empilha_escopo_func '(' args . ')' corpo desempilha_escopo_func
-   23 args: args . ',' arg
-
-    ')'  shift, and go to state 183
-    ','  shift, and go to state 184
-
-
-State 159
-
-   24 args: arg .
-
-    $default  reduce using rule 24 (args)
-
-
-State 160
-
-   27 arg: exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 27 (arg)
-
-
-State 161
-
-   87 exp: exp '(' params ')' .
-
-    $default  reduce using rule 87 (exp)
-
-
-State 162
-
-   43 prop: ID .
-   44     | ID . '[' exp ']'
-
-    '['  shift, and go to state 106
-
-    $default  reduce using rule 43 (prop)
-
-
-State 163
-
-   42 atr_obj: '(' exp ')' '.' prop . '=' exp
-
-    '='  shift, and go to state 185
-
-
-State 164
-
-   20 bloco: '{' empilha_escopo cmds '}' desempilha_escopo .
-
-    $default  reduce using rule 20 (bloco)
-
-
-State 165
-
-   58 decl: ID '=' exp fim_decl .
-
-    $default  reduce using rule 58 (decl)
-
-
-State 166
-
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-   92 param: ID '=' exp .
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 92 (param)
-
-
-State 167
-
-   88 params: param ',' params .
-
-    $default  reduce using rule 88 (params)
-
-
-State 168
-
-   56 indices: '[' exp ']' indices .
-
-    $default  reduce using rule 56 (indices)
-
-
-State 169
-
-   46 atr_array: ID '[' . atr ']' '=' exp
-   47          | ID '[' . exp ']' '=' exp
-   56 indices: '[' . exp ']' indices
-   57        | '[' . exp ']'
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
     '('          shift, and go to state 18
 
-    atr        go to state 72
+    atr        go to state 75
     atr_id     go to state 28
     atr_obj    go to state 29
     atr_array  go to state 30
-    exp        go to state 186
+    exp        go to state 197
     val        go to state 36
-
-
-State 170
-
-   54 matexp: matexp '+' . matexp
-
-    ID  shift, and go to state 187
-
-    matexp  go to state 188
-    matrix  go to state 136
-
-
-State 171
-
-   53 matexp: matexp '*' . matexp
-
-    ID  shift, and go to state 187
-
-    matexp  go to state 189
-    matrix  go to state 136
-
-
-State 172
-
-   50 rec: exp '=' . rec
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 132
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    atr_array  go to state 133
-    rec        go to state 190
-    matexp     go to state 135
-    matrix     go to state 136
-    exp        go to state 137
-    val        go to state 36
-
-
-State 173
-
-   44 prop: ID '[' exp ']' .
-
-    $default  reduce using rule 44 (prop)
-
-
-State 174
-
-   46 atr_array: ID '[' atr ']' '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 46 (atr_array)
-
-
-State 175
-
-   47 atr_array: ID '[' exp ']' '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 47 (atr_array)
-
-
-State 176
-
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo . desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' condicao ')' empilha_escopo corpo . desempilha_escopo
-
-    $default  reduce using rule 31 (desempilha_escopo)
-
-    desempilha_escopo  go to state 191
-
-
-State 177
-
-   71 corpo: '{' cmds . '}'
-
-    '}'  shift, and go to state 192
 
 
 State 178
 
-   72 corpo: cmd_1 ';' .
+   57 matexp: matexp '+' . matexp
 
-    $default  reduce using rule 72 (corpo)
+    ID  shift, and go to state 198
+
+    matexp  go to state 199
+    matrix  go to state 141
 
 
 State 179
 
-   67 for_loop: FOR '(' LET decl ';' condicao . ';' atr ')' corpo
+   56 matexp: matexp '*' . matexp
 
-    ';'  shift, and go to state 193
+    ID  shift, and go to state 198
+
+    matexp  go to state 200
+    matrix  go to state 141
 
 
 State 180
 
-   68 for_loop: FOR '(' atr ';' condicao ';' . atr ')' corpo
+   53 rec: exp '=' . rec
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 2
+    ID           shift, and go to state 137
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -3062,93 +3208,29 @@ State 180
     ARRAY_VAZIO  shift, and go to state 15
     TRUE         shift, and go to state 16
     '-'          shift, and go to state 17
-    '('          shift, and go to state 18
+    '('          shift, and go to state 47
 
-    atr        go to state 194
-    atr_id     go to state 28
-    atr_obj    go to state 29
-    atr_array  go to state 30
-    exp        go to state 81
+    atr_array  go to state 138
+    rec        go to state 201
+    matexp     go to state 140
+    matrix     go to state 141
+    exp        go to state 142
     val        go to state 36
 
 
 State 181
 
-   26 arg: ID '=' . exp
+   13 cmd_1: ID '.' ID '(' params ')' .
 
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 46
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 47
-
-    exp  go to state 195
-    val  go to state 36
+    $default  reduce using rule 13 (cmd_1)
 
 
 State 182
 
-   22 funcao: FUNCTION ID empilha_escopo_func '(' ')' corpo . desempilha_escopo_func
-
-    $default  reduce using rule 31 (desempilha_escopo)
-
-    desempilha_escopo_func  go to state 196
-    desempilha_escopo       go to state 197
-
-
-State 183
-
-   21 funcao: FUNCTION ID empilha_escopo_func '(' args ')' . corpo desempilha_escopo_func
+   46 prop: ID '.' . prop
 
     NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    LET          shift, and go to state 3
-    VAR          shift, and go to state 4
-    CONST        shift, and go to state 5
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    IF           shift, and go to state 9
-    WHILE        shift, and go to state 10
-    FOR          shift, and go to state 11
-    FUNCTION     shift, and go to state 12
-    RETURN       shift, and go to state 13
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 18
-    '{'          shift, and go to state 150
-
-    cmd_1        go to state 151
-    tipo_var     go to state 23
-    cmd_2        go to state 152
-    bloco        go to state 25
-    funcao       go to state 26
-    atr          go to state 27
-    atr_id       go to state 28
-    atr_obj      go to state 29
-    atr_array    go to state 30
-    loop         go to state 31
-    while_loop   go to state 32
-    for_loop     go to state 33
-    condicional  go to state 34
-    corpo        go to state 198
-    exp          go to state 35
-    val          go to state 36
-
-
-State 184
-
-   23 args: args ',' . arg
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 156
+    ID           shift, and go to state 151
     OBJ          shift, and go to state 6
     ARRAY        shift, and go to state 7
     STRING       shift, and go to state 8
@@ -3158,14 +3240,15 @@ State 184
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    arg  go to state 199
-    exp  go to state 160
-    val  go to state 36
+    prop  go to state 147
+    exp   go to state 73
+    val   go to state 36
 
 
-State 185
+State 183
 
-   42 atr_obj: '(' exp ')' '.' prop '=' . exp
+   14 cmd_1: ID '.' ID '.' ID '[' . exp ']' '(' params ')'
+   47 prop: ID '[' . exp ']'
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 46
@@ -3178,222 +3261,147 @@ State 185
     '-'          shift, and go to state 17
     '('          shift, and go to state 47
 
-    exp  go to state 200
+    exp  go to state 202
     val  go to state 36
+
+
+State 184
+
+   47 prop: ID '[' exp ']' .
+
+    $default  reduce using rule 47 (prop)
+
+
+State 185
+
+   49 atr_array: ID '[' atr ']' '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 49 (atr_array)
 
 
 State 186
 
-   45 atr_array: exp . indices '=' rec
-   47          | ID '[' exp . ']' '=' exp
-   56 indices: '[' exp . ']' indices
-   57        | '[' exp . ']'
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
+   50 atr_array: ID '[' exp ']' '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
 
     '+'  shift, and go to state 58
     '-'  shift, and go to state 59
     '*'  shift, and go to state 60
     '/'  shift, and go to state 61
     '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-    '['  shift, and go to state 64
-    ']'  shift, and go to state 201
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
 
-    indices  go to state 65
+    $default  reduce using rule 50 (atr_array)
 
 
 State 187
 
-   55 matrix: ID . indices
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo . desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' condicao ')' empilha_escopo corpo . desempilha_escopo
 
-    '['  shift, and go to state 64
+    $default  reduce using rule 33 (desempilha_escopo)
 
-    indices  go to state 111
+    desempilha_escopo  go to state 203
 
 
 State 188
 
-   53 matexp: matexp . '*' matexp
-   54       | matexp . '+' matexp
-   54       | matexp '+' matexp .
+   74 corpo: '{' cmds . '}'
 
-    '*'  shift, and go to state 171
-
-    $default  reduce using rule 54 (matexp)
+    '}'  shift, and go to state 204
 
 
 State 189
 
-   53 matexp: matexp . '*' matexp
-   53       | matexp '*' matexp .
-   54       | matexp . '+' matexp
+   75 corpo: cmd_1 ';' .
 
-    $default  reduce using rule 53 (matexp)
+    $default  reduce using rule 75 (corpo)
 
 
 State 190
 
-   50 rec: exp '=' rec .
+   70 for_loop: FOR '(' LET decl ';' condicao . ';' atr ')' corpo
 
-    $default  reduce using rule 50 (rec)
+    ';'  shift, and go to state 205
 
 
 State 191
 
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo . ELSE empilha_escopo corpo desempilha_escopo
-   70            | IF '(' condicao ')' empilha_escopo corpo desempilha_escopo .
+   71 for_loop: FOR '(' atr ';' condicao ';' . atr ')' corpo
 
-    ELSE  shift, and go to state 202
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 74
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 18
 
-    $default  reduce using rule 70 (condicional)
+    atr        go to state 206
+    atr_id     go to state 28
+    atr_obj    go to state 29
+    atr_array  go to state 30
+    exp        go to state 84
+    val        go to state 36
 
 
 State 192
 
-   71 corpo: '{' cmds '}' .
+   28 arg: ID '=' . exp
 
-    $default  reduce using rule 71 (corpo)
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 207
+    val  go to state 36
 
 
 State 193
 
-   67 for_loop: FOR '(' LET decl ';' condicao ';' . atr ')' corpo
+   24 funcao: FUNCTION ID empilha_escopo_func '(' ')' corpo . desempilha_escopo_func
 
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 18
+    $default  reduce using rule 33 (desempilha_escopo)
 
-    atr        go to state 203
-    atr_id     go to state 28
-    atr_obj    go to state 29
-    atr_array  go to state 30
-    exp        go to state 81
-    val        go to state 36
+    desempilha_escopo_func  go to state 208
+    desempilha_escopo       go to state 209
 
 
 State 194
 
-   68 for_loop: FOR '(' atr ';' condicao ';' atr . ')' corpo
-
-    ')'  shift, and go to state 204
-
-
-State 195
-
-   26 arg: ID '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 26 (arg)
-
-
-State 196
-
-   22 funcao: FUNCTION ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func .
-
-    $default  reduce using rule 22 (funcao)
-
-
-State 197
-
-   29 desempilha_escopo_func: desempilha_escopo .
-
-    $default  reduce using rule 29 (desempilha_escopo_func)
-
-
-State 198
-
-   21 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo . desempilha_escopo_func
-
-    $default  reduce using rule 31 (desempilha_escopo)
-
-    desempilha_escopo_func  go to state 205
-    desempilha_escopo       go to state 197
-
-
-State 199
-
-   23 args: args ',' arg .
-
-    $default  reduce using rule 23 (args)
-
-
-State 200
-
-   42 atr_obj: '(' exp ')' '.' prop '=' exp .
-   80 exp: exp . '+' exp
-   81    | exp . '-' exp
-   82    | exp . '*' exp
-   83    | exp . '/' exp
-   84    | exp . '%' exp
-   87    | exp . '(' params ')'
-
-    '+'  shift, and go to state 58
-    '-'  shift, and go to state 59
-    '*'  shift, and go to state 60
-    '/'  shift, and go to state 61
-    '%'  shift, and go to state 62
-    '('  shift, and go to state 86
-
-    $default  reduce using rule 42 (atr_obj)
-
-
-State 201
-
-   47 atr_array: ID '[' exp ']' . '=' exp
-   56 indices: '[' exp ']' . indices
-   57        | '[' exp ']' .
-
-    '='  shift, and go to state 144
-    '['  shift, and go to state 64
-
-    $default  reduce using rule 57 (indices)
-
-    indices  go to state 168
-
-
-State 202
-
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE . empilha_escopo corpo desempilha_escopo
-
-    $default  reduce using rule 30 (empilha_escopo)
-
-    empilha_escopo  go to state 206
-
-
-State 203
-
-   67 for_loop: FOR '(' LET decl ';' condicao ';' atr . ')' corpo
-
-    ')'  shift, and go to state 207
-
-
-State 204
-
-   68 for_loop: FOR '(' atr ';' condicao ';' atr ')' . corpo
+   23 funcao: FUNCTION ID empilha_escopo_func '(' args ')' . corpo desempilha_escopo_func
 
     NUM          shift, and go to state 1
     ID           shift, and go to state 2
@@ -3413,102 +3421,11 @@ State 204
     TRUE         shift, and go to state 16
     '-'          shift, and go to state 17
     '('          shift, and go to state 18
-    '{'          shift, and go to state 150
+    '{'          shift, and go to state 159
 
-    cmd_1        go to state 151
+    cmd_1        go to state 160
     tipo_var     go to state 23
-    cmd_2        go to state 152
-    bloco        go to state 25
-    funcao       go to state 26
-    atr          go to state 27
-    atr_id       go to state 28
-    atr_obj      go to state 29
-    atr_array    go to state 30
-    loop         go to state 31
-    while_loop   go to state 32
-    for_loop     go to state 33
-    condicional  go to state 34
-    corpo        go to state 208
-    exp          go to state 35
-    val          go to state 36
-
-
-State 205
-
-   21 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo desempilha_escopo_func .
-
-    $default  reduce using rule 21 (funcao)
-
-
-State 206
-
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo . corpo desempilha_escopo
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    LET          shift, and go to state 3
-    VAR          shift, and go to state 4
-    CONST        shift, and go to state 5
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    IF           shift, and go to state 9
-    WHILE        shift, and go to state 10
-    FOR          shift, and go to state 11
-    FUNCTION     shift, and go to state 12
-    RETURN       shift, and go to state 13
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 18
-    '{'          shift, and go to state 150
-
-    cmd_1        go to state 151
-    tipo_var     go to state 23
-    cmd_2        go to state 152
-    bloco        go to state 25
-    funcao       go to state 26
-    atr          go to state 27
-    atr_id       go to state 28
-    atr_obj      go to state 29
-    atr_array    go to state 30
-    loop         go to state 31
-    while_loop   go to state 32
-    for_loop     go to state 33
-    condicional  go to state 34
-    corpo        go to state 209
-    exp          go to state 35
-    val          go to state 36
-
-
-State 207
-
-   67 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' . corpo
-
-    NUM          shift, and go to state 1
-    ID           shift, and go to state 2
-    LET          shift, and go to state 3
-    VAR          shift, and go to state 4
-    CONST        shift, and go to state 5
-    OBJ          shift, and go to state 6
-    ARRAY        shift, and go to state 7
-    STRING       shift, and go to state 8
-    IF           shift, and go to state 9
-    WHILE        shift, and go to state 10
-    FOR          shift, and go to state 11
-    FUNCTION     shift, and go to state 12
-    RETURN       shift, and go to state 13
-    OBJ_VAZIO    shift, and go to state 14
-    ARRAY_VAZIO  shift, and go to state 15
-    TRUE         shift, and go to state 16
-    '-'          shift, and go to state 17
-    '('          shift, and go to state 18
-    '{'          shift, and go to state 150
-
-    cmd_1        go to state 151
-    tipo_var     go to state 23
-    cmd_2        go to state 152
+    cmd_2        go to state 161
     bloco        go to state 25
     funcao       go to state 26
     atr          go to state 27
@@ -3524,31 +3441,487 @@ State 207
     val          go to state 36
 
 
+State 195
+
+   25 args: args ',' . arg
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 165
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    arg  go to state 211
+    exp  go to state 169
+    val  go to state 36
+
+
+State 196
+
+   44 atr_obj: '(' exp ')' '.' prop '=' . exp
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 46
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    exp  go to state 212
+    val  go to state 36
+
+
+State 197
+
+   48 atr_array: exp . indices '=' rec
+   50          | ID '[' exp . ']' '=' exp
+   59 indices: '[' exp . ']' indices
+   60        | '[' exp . ']'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    '['  shift, and go to state 65
+    ']'  shift, and go to state 213
+
+    indices  go to state 66
+
+
+State 198
+
+   58 matrix: ID . indices
+
+    '['  shift, and go to state 65
+
+    indices  go to state 117
+
+
+State 199
+
+   56 matexp: matexp . '*' matexp
+   57       | matexp . '+' matexp
+   57       | matexp '+' matexp .
+
+    '*'  shift, and go to state 179
+
+    $default  reduce using rule 57 (matexp)
+
+
+State 200
+
+   56 matexp: matexp . '*' matexp
+   56       | matexp '*' matexp .
+   57       | matexp . '+' matexp
+
+    $default  reduce using rule 56 (matexp)
+
+
+State 201
+
+   53 rec: exp '=' rec .
+
+    $default  reduce using rule 53 (rec)
+
+
+State 202
+
+   14 cmd_1: ID '.' ID '.' ID '[' exp . ']' '(' params ')'
+   47 prop: ID '[' exp . ']'
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+    ']'  shift, and go to state 214
+
+
+State 203
+
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo . ELSE empilha_escopo corpo desempilha_escopo
+   73            | IF '(' condicao ')' empilha_escopo corpo desempilha_escopo .
+
+    ELSE  shift, and go to state 215
+
+    $default  reduce using rule 73 (condicional)
+
+
+State 204
+
+   74 corpo: '{' cmds '}' .
+
+    $default  reduce using rule 74 (corpo)
+
+
+State 205
+
+   70 for_loop: FOR '(' LET decl ';' condicao ';' . atr ')' corpo
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 74
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 18
+
+    atr        go to state 216
+    atr_id     go to state 28
+    atr_obj    go to state 29
+    atr_array  go to state 30
+    exp        go to state 84
+    val        go to state 36
+
+
+State 206
+
+   71 for_loop: FOR '(' atr ';' condicao ';' atr . ')' corpo
+
+    ')'  shift, and go to state 217
+
+
+State 207
+
+   28 arg: ID '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 28 (arg)
+
+
 State 208
 
-   68 for_loop: FOR '(' atr ';' condicao ';' atr ')' corpo .
+   24 funcao: FUNCTION ID empilha_escopo_func '(' ')' corpo desempilha_escopo_func .
 
-    $default  reduce using rule 68 (for_loop)
+    $default  reduce using rule 24 (funcao)
 
 
 State 209
 
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo . desempilha_escopo
+   31 desempilha_escopo_func: desempilha_escopo .
 
-    $default  reduce using rule 31 (desempilha_escopo)
-
-    desempilha_escopo  go to state 211
+    $default  reduce using rule 31 (desempilha_escopo_func)
 
 
 State 210
 
-   67 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo .
+   23 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo . desempilha_escopo_func
 
-    $default  reduce using rule 67 (for_loop)
+    $default  reduce using rule 33 (desempilha_escopo)
+
+    desempilha_escopo_func  go to state 218
+    desempilha_escopo       go to state 209
 
 
 State 211
 
-   69 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo .
+   25 args: args ',' arg .
 
-    $default  reduce using rule 69 (condicional)
+    $default  reduce using rule 25 (args)
+
+
+State 212
+
+   44 atr_obj: '(' exp ')' '.' prop '=' exp .
+   83 exp: exp . '+' exp
+   84    | exp . '-' exp
+   85    | exp . '*' exp
+   86    | exp . '/' exp
+   87    | exp . '%' exp
+   88    | exp . '.' exp
+   90    | exp . '(' params ')'
+
+    '+'  shift, and go to state 58
+    '-'  shift, and go to state 59
+    '*'  shift, and go to state 60
+    '/'  shift, and go to state 61
+    '%'  shift, and go to state 62
+    '('  shift, and go to state 88
+    '.'  shift, and go to state 64
+
+    $default  reduce using rule 44 (atr_obj)
+
+
+State 213
+
+   50 atr_array: ID '[' exp ']' . '=' exp
+   59 indices: '[' exp ']' . indices
+   60        | '[' exp ']' .
+
+    '='  shift, and go to state 153
+    '['  shift, and go to state 65
+
+    $default  reduce using rule 60 (indices)
+
+    indices  go to state 176
+
+
+State 214
+
+   14 cmd_1: ID '.' ID '.' ID '[' exp ']' . '(' params ')'
+   47 prop: ID '[' exp ']' .
+
+    '('  shift, and go to state 219
+
+    $default  reduce using rule 47 (prop)
+
+
+State 215
+
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE . empilha_escopo corpo desempilha_escopo
+
+    $default  reduce using rule 32 (empilha_escopo)
+
+    empilha_escopo  go to state 220
+
+
+State 216
+
+   70 for_loop: FOR '(' LET decl ';' condicao ';' atr . ')' corpo
+
+    ')'  shift, and go to state 221
+
+
+State 217
+
+   71 for_loop: FOR '(' atr ';' condicao ';' atr ')' . corpo
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 2
+    LET          shift, and go to state 3
+    VAR          shift, and go to state 4
+    CONST        shift, and go to state 5
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    IF           shift, and go to state 9
+    WHILE        shift, and go to state 10
+    FOR          shift, and go to state 11
+    FUNCTION     shift, and go to state 12
+    RETURN       shift, and go to state 13
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 18
+    '{'          shift, and go to state 159
+
+    cmd_1        go to state 160
+    tipo_var     go to state 23
+    cmd_2        go to state 161
+    bloco        go to state 25
+    funcao       go to state 26
+    atr          go to state 27
+    atr_id       go to state 28
+    atr_obj      go to state 29
+    atr_array    go to state 30
+    loop         go to state 31
+    while_loop   go to state 32
+    for_loop     go to state 33
+    condicional  go to state 34
+    corpo        go to state 222
+    exp          go to state 35
+    val          go to state 36
+
+
+State 218
+
+   23 funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo desempilha_escopo_func .
+
+    $default  reduce using rule 23 (funcao)
+
+
+State 219
+
+   14 cmd_1: ID '.' ID '.' ID '[' exp ']' '(' . params ')'
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 101
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 47
+
+    $default  reduce using rule 93 (params)
+
+    exp     go to state 102
+    params  go to state 223
+    param   go to state 104
+    val     go to state 36
+
+
+State 220
+
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo . corpo desempilha_escopo
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 2
+    LET          shift, and go to state 3
+    VAR          shift, and go to state 4
+    CONST        shift, and go to state 5
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    IF           shift, and go to state 9
+    WHILE        shift, and go to state 10
+    FOR          shift, and go to state 11
+    FUNCTION     shift, and go to state 12
+    RETURN       shift, and go to state 13
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 18
+    '{'          shift, and go to state 159
+
+    cmd_1        go to state 160
+    tipo_var     go to state 23
+    cmd_2        go to state 161
+    bloco        go to state 25
+    funcao       go to state 26
+    atr          go to state 27
+    atr_id       go to state 28
+    atr_obj      go to state 29
+    atr_array    go to state 30
+    loop         go to state 31
+    while_loop   go to state 32
+    for_loop     go to state 33
+    condicional  go to state 34
+    corpo        go to state 224
+    exp          go to state 35
+    val          go to state 36
+
+
+State 221
+
+   70 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' . corpo
+
+    NUM          shift, and go to state 1
+    ID           shift, and go to state 2
+    LET          shift, and go to state 3
+    VAR          shift, and go to state 4
+    CONST        shift, and go to state 5
+    OBJ          shift, and go to state 6
+    ARRAY        shift, and go to state 7
+    STRING       shift, and go to state 8
+    IF           shift, and go to state 9
+    WHILE        shift, and go to state 10
+    FOR          shift, and go to state 11
+    FUNCTION     shift, and go to state 12
+    RETURN       shift, and go to state 13
+    OBJ_VAZIO    shift, and go to state 14
+    ARRAY_VAZIO  shift, and go to state 15
+    TRUE         shift, and go to state 16
+    '-'          shift, and go to state 17
+    '('          shift, and go to state 18
+    '{'          shift, and go to state 159
+
+    cmd_1        go to state 160
+    tipo_var     go to state 23
+    cmd_2        go to state 161
+    bloco        go to state 25
+    funcao       go to state 26
+    atr          go to state 27
+    atr_id       go to state 28
+    atr_obj      go to state 29
+    atr_array    go to state 30
+    loop         go to state 31
+    while_loop   go to state 32
+    for_loop     go to state 33
+    condicional  go to state 34
+    corpo        go to state 225
+    exp          go to state 35
+    val          go to state 36
+
+
+State 222
+
+   71 for_loop: FOR '(' atr ';' condicao ';' atr ')' corpo .
+
+    $default  reduce using rule 71 (for_loop)
+
+
+State 223
+
+   14 cmd_1: ID '.' ID '.' ID '[' exp ']' '(' params . ')'
+
+    ')'  shift, and go to state 226
+
+
+State 224
+
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo . desempilha_escopo
+
+    $default  reduce using rule 33 (desempilha_escopo)
+
+    desempilha_escopo  go to state 227
+
+
+State 225
+
+   70 for_loop: FOR '(' LET decl ';' condicao ';' atr ')' corpo .
+
+    $default  reduce using rule 70 (for_loop)
+
+
+State 226
+
+   14 cmd_1: ID '.' ID '.' ID '[' exp ']' '(' params ')' .
+
+    $default  reduce using rule 14 (cmd_1)
+
+
+State 227
+
+   72 condicional: IF '(' condicao ')' empilha_escopo corpo desempilha_escopo ELSE empilha_escopo corpo desempilha_escopo .
+
+    $default  reduce using rule 72 (condicional)

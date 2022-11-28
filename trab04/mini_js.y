@@ -144,6 +144,14 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
                          $$.c = $3.c + to_string(n_params) + $1.c + "$" + "^"; 
                          n_params = 0; 
                        }
+  | ID '.' ID '(' params ')' { print_prod("cmd_1 -> ID . ID '(' params ')'"); // chamada de funcao
+                        $$.c = $5.c + to_string(n_params) + $1.c + "@" + $3.c + "[@]" + "$" + "^"; 
+                        n_params = 0; 
+                      }
+  | ID '.' ID '.' ID '[' exp ']' '(' params ')' { print_prod("cmd_1 -> ID . ID . matrix ( params )"); // chamada de funcao
+                         $$.c = $10.c + to_string(n_params) + $1.c + "@" + $3.c + "[@]" + $5.c + "[@]" + $7.c + "[@]" + "$" + "^"; 
+                         n_params = 0; 
+                       }
   | funcao             { print_prod("cmd_1 -> funcao"); }
   ;
 
@@ -237,8 +245,9 @@ atr_obj: ID '.' prop '=' exp     { print_prod("atr_obj -> ID . prop = exp"); $$.
   | '(' exp ')' '.' prop '=' exp { print_prod("atr_obj -> ID . prop = exp"); $$.c = $2.c + $5.c + $7.c + "[=]"; }
   ;
 
-prop: ID            { print_prod("prop -> ID"); }
-  | ID '[' exp ']'  { print_prod("prop -> ID [ exp ]"); $$.c = to_vector($1.v) + "[@]" + $3.c; }
+prop: exp            { print_prod("prop -> ID"); $$.c = to_vector($1.v); }
+  | ID '.' prop      { print_prod("prop -> ID . prop"); $$.c = to_vector($1.v) + "[@]" + $3.c; }
+  | ID '[' exp ']'   { print_prod("prop -> ID [exp] "); $$.c = to_vector($1.v) + "[@]" + $3.c; }
   ;
 
 atr_array: exp indices '=' rec    { print_prod("atr_array -> ID indices = exp"); $$.c = $1.c + $2.c + $4.c + "[=]"; }
@@ -334,7 +343,7 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
   | exp '*' exp         { print_prod("exp -> exp * exp"); $$.c = $1.c + $3.c + "*"; }
   | exp '/' exp         { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
   | exp '%' exp         { print_prod("exp -> exp % exp"); $$.c = $1.c + $3.c + "%"; }
-  | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
+  | exp '.' exp         { print_prod("exp -> exp . exp"); $$.c = $1.c + $3.v + "[@]"; }
   | val                 { print_prod("exp -> val"); }
   | exp '(' params ')'  { print_prod("exp -> exp ( params )"); 
                           $$.c = $3.c + to_string(n_params) + $1.c + "$";
