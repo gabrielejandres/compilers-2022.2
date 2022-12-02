@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <sstream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -60,6 +60,7 @@ vector<string> gera_funcao(string id, string label);
 vector<string> gera_fim_funcao();
 vector<string> gera_retorno();
 void atualiza_variaveis_declaradas_escopo(string var, string tipo);
+int obtem_indice(vector<string> v, string K);
 
 // Variaveis
 map<string, Simbolo> variaveis_declaradas;
@@ -343,7 +344,12 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
   | exp '*' exp         { print_prod("exp -> exp * exp"); $$.c = $1.c + $3.c + "*"; }
   | exp '/' exp         { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
   | exp '%' exp         { print_prod("exp -> exp % exp"); $$.c = $1.c + $3.c + "%"; }
-  | exp '.' exp         { print_prod("exp -> exp . exp"); $$.c = $1.c + $3.v + "[@]"; }
+  | exp '.' exp         { print_prod("exp -> exp . exp");
+                          if ($3.c[($3.c).size() - 1] == "@" || $3.c[($3.c).size() - 1] == "[@]") $3.c.pop_back();
+                          if (obtem_indice($3.c, "@") != -1) $3.c.at(obtem_indice($3.c, "@")) = "[@]";
+                          $$.c = $1.c + $3.c + "[@]";
+                        }
+  | matrix              { print_prod("exp -> matrix"); $$.c = $1.c + "[@]"; }
   | val                 { print_prod("exp -> val"); }
   | exp '(' params ')'  { print_prod("exp -> exp ( params )"); 
                           $$.c = $3.c + to_string(n_params) + $1.c + "$";
@@ -419,7 +425,6 @@ vector<string> gera_funcao(string id, string label) {
 }
 
 void atualiza_variaveis_declaradas(string var, string tipo) {
-  // cout << "var global" << var << endl;
   auto it = variaveis_declaradas.find(var);
 
   if (it == variaveis_declaradas.end()) {
@@ -436,7 +441,6 @@ void atualiza_variaveis_declaradas(string var, string tipo) {
 }
 
 void atualiza_variaveis_declaradas_escopo(string var, string tipo) {
-  // cout << "var func" << var << endl;
   auto it = variaveis_declaradas_escopo.find(var);
 
   if (it == variaveis_declaradas_escopo.end()) {
@@ -547,6 +551,14 @@ vector<string> resolve_enderecos(vector<string> entrada) {
         saida[i] = to_string(label[saida[i]]);
     
   return saida;
+}
+
+int obtem_indice(vector<string> v, string K) {
+    auto it = find(v.begin(), v.end(), K);
+
+    if (it != v.end()) return it - v.begin();
+
+    return -1;
 }
 
 int main(int argc, char* argv[]) {
