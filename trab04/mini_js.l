@@ -1,3 +1,5 @@
+%option noyywrap
+
 DELIM   [\t\n ]
 DIGITO  [0-9]
 LETRA   [A-Za-z_]
@@ -7,6 +9,8 @@ ESCAPE          [\\][^\n]
 ASPAS_SMP       \'([^']|{ESCAPE}|(\'\'))*\'
 ASPAS_DP        \"([^"]|{ESCAPE}|(\"\"))*\"
 STRING          {ASPAS_SMP}|{ASPAS_DP}
+ARRAY_VAZIO    \[{DELIM}*\]
+OBJ_VAZIO       \{{DELIM}*\}
 
 %%
 
@@ -62,11 +66,17 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 "return"    { atualiza_atributos_token(RETURN);
                 return RETURN; }
 
-"{ }"       { atualiza_atributos_token(BLOCO);
-                return BLOCO; }
+"true"      { atualiza_atributos_token(TRUE);
+                return TRUE; }
 
 "asm{".*"}"  {  yylval.c = tokeniza(yytext + 3);
                 return ASM; }
+
+{OBJ_VAZIO}       { atualiza_atributos_token(OBJ_VAZIO);
+                return OBJ_VAZIO; }
+
+{ARRAY_VAZIO} { atualiza_atributos_token(ARRAY_VAZIO);
+                return ARRAY_VAZIO; }
 
 {ID}       { atualiza_atributos_token(ID);
              return ID; }
