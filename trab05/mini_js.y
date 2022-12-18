@@ -100,6 +100,8 @@ vector<map<string, Simbolo>> ts = {};
 %token BLOCO
 %token LAMBDA_NOVO_OBJ
 %token ARROW
+%token TRUE
+%token FALSE
 
 // Start indica o simbolo inicial da gramatica
 %start s
@@ -168,6 +170,12 @@ funcao: FUNCTION ID empilha_escopo_func '(' args ')' corpo  desempilha_escopo_fu
                                           string fim_func = gera_label($2.v); 
                                           funcoes = funcoes + (":" + fim_func) + $6.c + gera_fim_funcao();
                                           $$.c = gera_funcao($2.v, fim_func);
+                                        }
+  | FUNCTION empilha_escopo_func '(' args ')' corpo desempilha_escopo_func {
+                                          print_prod("funcao -> FUNCTION ( args ) corpo"); 
+                                          string fim_func = gera_label("anonima"); 
+                                          funcoes = funcoes + (":" + fim_func) + $4.c + $6.c + gera_fim_funcao();
+                                          $$.c = gera_funcao("anonima", fim_func);
                                         }
   | ID LAMBDA_NOVO_OBJ  { print_prod("funcao -> ID LAMBDA_NOVO_OBJ"); 
                           // $$.c = gera_novo_objeto($1.v);
@@ -270,7 +278,7 @@ indices: '[' exp ']' indices { print_prod("indices -> [ exp ] indices"); $$.c = 
 
 decl: ID '=' exp fim_decl { if(eh_escopo) atualiza_variaveis_declaradas_escopo($1.v); else atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + $3.c + "=" + "^" + $4.c; }
   | ID fim_decl           { if(eh_escopo) atualiza_variaveis_declaradas_escopo($1.v); else atualiza_variaveis_declaradas($1.v);  print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "&" + $2.c; }
-  | ID '=' funcao fim_decl       { print_prod("decl -> funcao fim_decl"); $$.c = to_vector($1.v) + "&" + $3.c + $4.c; }   
+  | ID '=' funcao fim_decl       { print_prod("decl -> funcao fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + $3.c + $4.c; }   
   | ID '=' objeto fim_decl       { print_prod("decl -> ID = { corpo_obj } fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + "{}" + $3.c + "=" + "^"; }
   ;
 
@@ -334,7 +342,9 @@ params: exp ',' params { print_prod("params -> exp , params"); $$.c = $1.c + $3.
   | matrix ',' params  { print_prod("params -> matrix , params"); $$.c = $1.c + $3.c; n_params++; }
   ;
 
-val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
+val : TRUE      { print_prod("val -> TRUE"); $$.c = to_vector($1.v); }
+  | FALSE        { print_prod("val -> FALSE"); $$.c = to_vector($1.v); }
+  | ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
   | NUM           { print_prod("val -> NUM"); }
   | '-' NUM       { print_prod("val -> - NUM"); $$.c = to_vector("0") + $2.c + "-" ; }
   | '(' exp ')'   { print_prod("val -> ( exp )"); $$ = $2; }
@@ -384,6 +394,7 @@ vector<string> gera_inicializacao_de_argumento(string id, int n_args) {
 }
 
 vector<string> gera_funcao(string id, string label) {
+  if (id == "anonima") return to_vector("{}") + "=" + "'&funcao'" + label + "[=]" + "^";
   return to_vector(id) + "&" + id + "{}" + "=" + "'&funcao'" + label + "[=]" + "^";
 }
 

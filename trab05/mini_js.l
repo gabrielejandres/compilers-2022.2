@@ -62,6 +62,12 @@ STRING          {ASPAS_SMP}|{ASPAS_DP}
 "return"    { atualiza_atributos_token(RETURN);
                 return RETURN; }
 
+"true"      { atualiza_atributos_token(TRUE);
+                return TRUE; }
+
+"false"      { atualiza_atributos_token(FALSE);
+                return FALSE; }
+
 "{ }"       { atualiza_atributos_token(BLOCO);
                 return BLOCO; }
 
