@@ -220,7 +220,7 @@ desempilha_escopo_func: desempilha_escopo { print_prod("desempilha_escopo_func -
 empilha_escopo: { print_prod("empilha_escopo -> "); ts.push_back(map<string, Simbolo>{}); eh_escopo = true; }
   ;
 
-desempilha_escopo: { print_prod("desempilha_escopo -> "); ts.pop_back(); eh_escopo = false; }
+desempilha_escopo: { print_prod("desempilha_escopo -> "); ts.pop_back(); variaveis_declaradas_escopo.clear(); eh_escopo = false; }
   ;
 
 atr: atr_id         { print_prod("atr -> atr_id"); }
@@ -271,6 +271,15 @@ indices: '[' exp ']' indices { print_prod("indices -> [ exp ] indices"); $$.c = 
 decl: ID '=' exp fim_decl { if(eh_escopo) atualiza_variaveis_declaradas_escopo($1.v); else atualiza_variaveis_declaradas($1.v); print_prod("decl -> ID = exp fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + $3.c + "=" + "^" + $4.c; }
   | ID fim_decl           { if(eh_escopo) atualiza_variaveis_declaradas_escopo($1.v); else atualiza_variaveis_declaradas($1.v);  print_prod("decl -> ID fim_decl"); $$.c = to_vector($1.v) + "&" + $2.c; }
   | ID '=' funcao fim_decl       { print_prod("decl -> funcao fim_decl"); $$.c = to_vector($1.v) + "&" + $3.c + $4.c; }   
+  | ID '=' objeto fim_decl       { print_prod("decl -> ID = { corpo_obj } fim_decl"); $$.c = to_vector($1.v) + "&" + to_vector($1.v) + "{}" + $3.c + "=" + "^"; }
+  ;
+
+objeto: '{' corpo_obj '}' { print_prod("objeto -> { corpo_obj }"); $$.c = $2.c; }
+  ;
+
+corpo_obj: ID ':' exp ',' corpo_obj { print_prod("corpo_obj -> ID : exp , corpo_obj"); $$.c = to_vector($1.v) + $3.c + "[<=]" + $5.c; }
+  | ID ':' exp                   { print_prod("corpo_obj -> ID : exp ,"); $$.c = to_vector($1.v) + $3.c + "[<=]"; }
+  | ID ':' objeto                   { print_prod("corpo_obj -> ID : objeto"); $$.c = to_vector($1.v) + "{}" + $3.c + "[<=]"; }
   ;
 
 fim_decl: ',' decl     { print_prod("fim_decl -> , decl"); $$.c = $2.c; }
@@ -322,6 +331,7 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
 params: exp ',' params { print_prod("params -> exp , params"); $$.c = $1.c + $3.c; n_params++; }
   | exp                { print_prod("params -> exp"); $$.c = $1.c; n_params++; }
   |                    { print_prod("params -> epsilon"); $$.c = epsilon; }
+  | matrix ',' params  { print_prod("params -> matrix , params"); $$.c = $1.c + $3.c; n_params++; }
   ;
 
 val : ID          { print_prod("val -> ID"); $$.c = to_vector($1.v) + "@"; }
@@ -357,7 +367,7 @@ void print_NPR(vector<string> c) {
 }
 
 void print_prod(const char *s) {
-  // cout << s << endl;
+  cout << s << endl;
 }
 
 vector<string> gera_retorno() {
@@ -400,11 +410,21 @@ void atualiza_variaveis_declaradas_escopo(string var) {
 }
 
 void verifica_variaveis_declaradas(string var) {
-  auto it = variaveis_declaradas.find(var);
 
-  if (it == variaveis_declaradas.end()) {
-    cout << "Erro: a variável '" << var << "' não foi declarada." << endl;
-    exit(1);
+  if (!eh_escopo) {
+    auto it = variaveis_declaradas.find(var);
+
+    if (it == variaveis_declaradas.end()) {
+      cout << "Erro: a variável '" << var << "' não foi declarada." << endl;
+      exit(1);
+    }
+  } else {
+    auto it = variaveis_declaradas_escopo.find(var);
+
+    if (it == variaveis_declaradas_escopo.end()) {
+      cout << "Erro: a variável '" << var << "' não foi declarada." << endl;
+      exit(1);
+    }
   }
 }
 
