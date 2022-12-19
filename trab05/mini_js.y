@@ -72,6 +72,7 @@ int n_params;
 vector<bool> pode_retornar = { false };
 bool eh_escopo = false;
 vector<map<string, Simbolo>> ts = {};
+int posicoes;
 
 %}
 
@@ -134,7 +135,7 @@ cmd_1 : atr           { print_prod("cmd_1 -> atr"); $$.c = $1.c + "^"; }
   | CONST decl        { print_prod("cmd_1 -> CONST decl"); $$.c = $2.c; }
   | loop              { print_prod("cmd_1 -> loop"); }
   | exp ASM           { print_prod("cmd_1 -> exp ASM"); $$.c = $1.c + $2.c + "^"; }
-  | exp               { print_prod("cmd_1 -> exp"); $$.c = $1.c; }
+  | exp               { print_prod("cmd_1 -> exp"); $$.c = $1.c + "^"; }
   | RETURN            { print_prod("cmd_1 -> RETURN"); 
                         if(!pode_retornar.back()) {
                             cout << "Erro: Não é permitido 'return' fora de funções." << endl;
@@ -290,6 +291,16 @@ corpo_obj: ID ':' exp ',' corpo_obj { print_prod("corpo_obj -> ID : exp , corpo_
   | ID ':' objeto                   { print_prod("corpo_obj -> ID : objeto"); $$.c = to_vector($1.v) + "{}" + $3.c + "[<=]"; }
   ;
 
+array: '[' corpo_array ']'   { print_prod("array -> [ corpo_array ]"); $$.c = $2.c; }
+  ;
+
+
+corpo_array : exp { posicoes++; } exps_array { $$.c = to_vector("0") + $1.c + "[<=]" + $3.c; $1.c.clear(); $2.c.clear(); $3.c.clear(); posicoes = 0; };
+
+exps_array : ',' exp { print_prod("exps_array -> , exp"); $1.c = to_vector(to_string(posicoes)) + $2.c + "[<=]"; posicoes++; } exps_array { $$.c = $1.c + $4.c; } 
+  | { print_prod("exps_array -> epsilon"); }
+  ;
+
 fim_decl: ',' decl     { print_prod("fim_decl -> , decl"); $$.c = $2.c; }
   |                    { print_prod("fim_decl -> epsilon"); $$.c = epsilon; }
   ;
@@ -331,9 +342,9 @@ exp: exp '+' exp        { print_prod("exp -> exp + exp"); $$.c = $1.c + $3.c + "
   | exp '*' exp         { print_prod("exp -> exp * exp"); $$.c = $1.c + $3.c + "*"; }
   | exp '/' exp         { print_prod("exp -> exp / exp"); $$.c = $1.c + $3.c + "/"; }
   | exp '%' exp         { print_prod("exp -> exp % exp"); $$.c = $1.c + $3.c + "%"; }
-  | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.v + "[@]"; }
+  | ID '.' ID           { print_prod("exp -> ID . ID"); $$.c = to_vector($1.v) + "@" + $3.c + "[@]"; }
   | val                 { print_prod("exp -> val"); }
-  | exp '(' params ')'  { print_prod("exp -> exp ( params )"); $$.c = $3.c + to_string(n_params) + $1.v + "@" + "$"; n_params = 0;}
+  | exp '(' params ')'  { print_prod("exp -> exp ( params )"); $$.c = $3.c + to_string(n_params) + $1.c + "$"; n_params = 0;}
   ;
 
 params: exp ',' params { print_prod("params -> exp , params"); $$.c = $1.c + $3.c; n_params++; }
@@ -353,6 +364,7 @@ val : TRUE      { print_prod("val -> TRUE"); $$.c = to_vector($1.v); }
   | STRING        { print_prod("val -> STRING"); }
   | ID INC        { print_prod("val -> ID INC"); $$.c = to_vector($1.v) + "@" + to_vector($1.v) + to_vector($1.v) + "@" + "1" + "+" + "=" + "^"; }
   | BLOCO         { print_prod("val -> BLOCO VAZIO"); }
+  | array         { print_prod("val -> array"); $$.c = "[]" + $1.c; }
   ;
 
 %%
